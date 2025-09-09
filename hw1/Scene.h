@@ -5,7 +5,7 @@ class Light;
 
 class Scene {
 public:
-	void BuildObjects(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
+	void BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 	void Update(float fTimeElapsed);
 	void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 

@@ -254,6 +254,8 @@ void GameFramework::ChangeSwapChainState()
 
 void GameFramework::Update()
 {
+	m_GameTimer.Tick(0.0f);
+
 	m_pScene->Update(m_GameTimer.GetTimeElapsed());
 }
 
@@ -283,7 +285,9 @@ void GameFramework::Render()
 {
 	RenderBegin();
 
-
+	{
+		// TODO: Render Logic
+	}
 
 	RenderEnd();
 	Present();
@@ -315,6 +319,9 @@ void GameFramework::Present()
 	dxgiPresentParameters.pScrollOffset = NULL;
 
 	m_pdxgiSwapChain->Present1(1, 0, &dxgiPresentParameters);
+
+
+
 }
 
 void GameFramework::MoveToNextFrame()
