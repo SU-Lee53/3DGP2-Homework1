@@ -27,7 +27,7 @@ GameFramework::GameFramework(HINSTANCE hInstance, HWND hWnd, UINT uiWidth, UINT 
 	m_tstrFrameRate = L"3DGP2-Homework1";
 
 	m_pScene = std::make_shared<Scene>();
-	m_pScene->BuildObjects(m_pd3dCommandList);
+	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 }
 
