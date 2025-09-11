@@ -85,7 +85,12 @@ std::shared_ptr<MESHLOADINFO> GameObject::LoadMeshInfoFromFile(std::ifstream& in
 				for (int i = 0; i < pMeshInfo->nSubMeshes.size(); ++i) {
 					strRead = ::ReadStringFromFile(inFile);
 					if (strRead == "<SubMesh>") {
-						// TODO : TOMORROW
+						int nIndex;
+						int nSubSetIndices;
+						inFile.read((char*)&nIndex, sizeof(int));
+						inFile.read((char*)&nSubSetIndices, sizeof(int));
+
+
 					}
 
 				}
