@@ -26,7 +26,17 @@ struct MaterialColors {
 
 class Shader;
 
+struct CB_MATERIAL_DATA {
+	XMFLOAT4 xmf4Ambient;
+	XMFLOAT4 xmf4Diffuse;
+	XMFLOAT4 xmf4Specular;
+	XMFLOAT4 xmf4Emissive;
+};
+
 class Material {
+public:
+	Material(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
+
 public:
 	void SetMaterialColors(std::shared_ptr<MaterialColors> pMaterialColors) { m_pMaterialColors = pMaterialColors; }
 	void SetShader(std::shared_ptr<Shader> pShader) { m_pShader = pShader; }
@@ -37,6 +47,7 @@ public:
 private:
 	std::shared_ptr<Shader> m_pShader;
 	std::shared_ptr<MaterialColors> m_pMaterialColors;
+	std::shared_ptr<ConstantBuffer> m_pMaterialCBuffer;
 
 protected:
 	static std::shared_ptr<Shader> m_pIlluminatedShader;

@@ -28,7 +28,7 @@ protected:
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC	m_d3dPipelineStateDesc;
 };
 
-class IlluminatedShader {
+class IlluminatedShader : public Shader{
 public:
 	virtual void Create(ComPtr<ID3D12Device> pd3dDevice) override;
 

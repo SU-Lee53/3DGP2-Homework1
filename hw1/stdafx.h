@@ -59,10 +59,11 @@ using namespace DirectX;
 
 
 #include "GameFramework.h"
+#include "ConstantBuffer.h"
 
 
 
-ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ComPtr<ID3D12Resource>& pd3dUploadBuffer);
+ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource** rppd3dUploadBuffer);
 
 template<typename T>
 struct ConstantBufferSize {

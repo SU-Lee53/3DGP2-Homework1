@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 
-ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ComPtr<ID3D12Resource>& pd3dUploadBuffer)
+ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource** rppd3dUploadBuffer)
 {
 	ComPtr<ID3D12Resource> pd3dBuffer = NULL;
 
@@ -46,18 +46,24 @@ ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> pd3dDevice, Com
 		{
 		case D3D12_HEAP_TYPE_DEFAULT:
 		{
-			if (pd3dUploadBuffer)
-			{
+			if (rppd3dUploadBuffer) {
 				d3dHeapPropertiesDesc.Type = D3D12_HEAP_TYPE_UPLOAD;
-				pd3dDevice->CreateCommittedResource(&d3dHeapPropertiesDesc, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, __uuidof(ID3D12Resource), (void**)(pd3dUploadBuffer.Get()));
+				pd3dDevice->CreateCommittedResource(
+					&d3dHeapPropertiesDesc,
+					D3D12_HEAP_FLAG_NONE,
+					&d3dResourceDesc,
+					D3D12_RESOURCE_STATE_GENERIC_READ,
+					NULL,
+					IID_PPV_ARGS(rppd3dUploadBuffer)
+				);
 
 				D3D12_RANGE d3dReadRange = { 0, 0 };
 				UINT8* pBufferDataBegin = NULL;
-				pd3dUploadBuffer->Map(0, &d3dReadRange, (void**)&pBufferDataBegin);
+				(*rppd3dUploadBuffer)->Map(0, &d3dReadRange, (void**)&pBufferDataBegin);
 				memcpy(pBufferDataBegin, pData, nBytes);
-				pd3dUploadBuffer->Unmap(0, NULL);
+				(*rppd3dUploadBuffer)->Unmap(0, NULL);
 
-				pd3dCommandList->CopyResource(pd3dBuffer.Get(), pd3dUploadBuffer.Get());
+				pd3dCommandList->CopyResource(pd3dBuffer.Get(), *rppd3dUploadBuffer);
 
 				D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 				::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
@@ -68,6 +74,8 @@ ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> pd3dDevice, Com
 				d3dResourceBarrier.Transition.StateAfter = d3dResourceStates;
 				d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 				pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+
+
 			}
 			break;
 		}
