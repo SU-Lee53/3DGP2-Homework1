@@ -1,11 +1,13 @@
 #pragma once
 
 class ConstantBuffer {
+public:
 	ConstantBuffer(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT uiElementSize);
 	~ConstantBuffer();
 
 	template<typename T>
-	void UpdateShaderVariables(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, T* pData, UINT uiRootParameterIndex);
+	void UpdateData(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, T* pData);
+	void SetBufferToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT uiRootParameterIndex);
 
 private:
 	ComPtr<ID3D12Resource> m_pd3dCBuffer;
@@ -14,9 +16,7 @@ private:
 };
 
 template<typename T>
-inline void ConstantBuffer::UpdateShaderVariables(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, T* pData, UINT uiRootParameterIndex)
+inline void ConstantBuffer::UpdateData(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, T* pData)
 {
 	::memcpy(m_pMappedPtr, pData, sizeof(T));
-	pd3dCommandList->SetGraphicsRootConstantBufferView(uiRootParameterIndex, m_pd3dCBuffer->GetGPUVirtualAddress());
-
 }

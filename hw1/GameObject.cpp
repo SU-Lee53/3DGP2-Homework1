@@ -3,9 +3,120 @@
 
 
 
+XMFLOAT3 GameObject::GetPosition()
+{
+	return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43));
+}
 
+XMFLOAT3 GameObject::GetLook()
+{
+	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33)));
+}
 
+XMFLOAT3 GameObject::GetUp()
+{
+	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._21, m_xmf4x4World._22, m_xmf4x4World._23)));
+}
 
+XMFLOAT3 GameObject::GetRight()
+{
+	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13)));
+}
+
+void GameObject::SetPosition(float x, float y, float z)
+{
+	m_xmf4x4Transform._41 = x;
+	m_xmf4x4Transform._42 = y;
+	m_xmf4x4Transform._43 = z;
+
+	UpdateTransform(NULL);
+}
+
+void GameObject::SetPosition(XMFLOAT3 xmf3Position)
+{
+	SetPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
+}
+
+void GameObject::SetScale(float x, float y, float z)
+{
+	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
+
+	UpdateTransform(NULL);
+}
+
+void GameObject::MoveStrafe(float fDistance)
+{
+	XMFLOAT3 xmf3Position = GetPosition();
+	XMFLOAT3 xmf3Right = GetRight();
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Right, fDistance);
+	GameObject::SetPosition(xmf3Position);
+}
+
+void GameObject::MoveUp(float fDistance)
+{
+	XMFLOAT3 xmf3Position = GetPosition();
+	XMFLOAT3 xmf3Up = GetUp();
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Up, fDistance);
+	GameObject::SetPosition(xmf3Position);
+}
+
+void GameObject::MoveForward(float fDistance)
+{
+	XMFLOAT3 xmf3Position = GetPosition();
+	XMFLOAT3 xmf3Look = GetLook();
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fDistance);
+	GameObject::SetPosition(xmf3Position);
+}
+
+void GameObject::Rotate(float fPitch, float fYaw, float fRoll)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+
+	UpdateTransform(NULL);
+}
+
+void GameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis), XMConvertToRadians(fAngle));
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+
+	UpdateTransform(NULL);
+}
+
+void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationQuaternion(XMLoadFloat4(pxmf4Quaternion));
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+
+	UpdateTransform(NULL);
+}
+
+void GameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+{
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+
+	for (auto& pChild : m_pChildren) {
+		pChild->UpdateTransform(&m_xmf4x4World);
+	}
+}
+
+std::shared_ptr<GameObject> GameObject::FindFrame(const std::string& svFrameName)
+{
+	std::shared_ptr<GameObject> pFrameObject;
+	if (svFrameName == m_strFrameName) {
+		return shared_from_this();
+	}
+
+	for (auto& pChild : m_pChildren) {
+		if (pFrameObject = pChild->FindFrame(svFrameName)) {
+			return pFrameObject;
+		}
+	}
+
+	return nullptr;
+}
 
 /////////////////////
 // Load From Files //
@@ -166,7 +277,7 @@ std::shared_ptr<MESHLOADINFO> GameObject::LoadMeshInfoFromFile(std::ifstream& in
 	return pMeshInfo;
 }
 
-std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, std::shared_ptr<GameObject> pParent, std::ifstream& inFile)
+std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, ComPtr<ID3D12RootSignature> pd3dRootSignature, std::shared_ptr<GameObject> pParent, std::ifstream& inFile)
 {
 	std::string strRead;
 
@@ -195,7 +306,7 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 			inFile.read((char*)&xmf4Quaternion, sizeof(XMFLOAT4)); //Quaternion
 		}
 		else if (strRead == "<TransformMatrix>:") {
-			inFile.read((char*)&pGameObject->xmf4x4Transform, sizeof(XMFLOAT4X4));
+			inFile.read((char*)&pGameObject->m_xmf4x4Transform, sizeof(XMFLOAT4X4));
 		}
 		else if (strRead == "<Mesh>:") {
 			std::shared_ptr<MESHLOADINFO> pMeshLoadInfo = GameObject::LoadMeshInfoFromFile(inFile);
@@ -203,9 +314,10 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 				std::shared_ptr<Mesh> pMesh;
 				if (pMeshLoadInfo->nType & VERTEX_TYPE_NORMAL) {
 					pMesh = std::make_shared<IlluminatedMesh>(pd3dDevice, pd3dCommandList, *pMeshLoadInfo);
+					RESOURCE->AddMesh(pMeshLoadInfo->strMeshName, pMesh);
 				}
 				if (pMesh) {
-					pGameObject->m_pMesh = pMesh;
+					pGameObject->m_pMesh = RESOURCE->GetMesh(pMeshLoadInfo->strMeshName);
 				}
 			}
 		}
@@ -215,17 +327,20 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 			if (materialInfos.size() != 0) {
 				pGameObject->m_pMaterials.reserve(materialInfos.size());
 
-				for (const auto& materialInfo : materialInfos) {
+				for (int i = 0; i < materialInfos.size(); ++i) {
 					std::shared_ptr<Material> pMaterial = std::make_shared<Material>(pd3dDevice, pd3dCommandList);
 
-					std::shared_ptr<MaterialColors> pMaterialColors = std::make_shared<MaterialColors>(materialInfo);
+					std::shared_ptr<MaterialColors> pMaterialColors = std::make_shared<MaterialColors>(materialInfos[i]);
 					pMaterial->SetMaterialColors(pMaterialColors);
 					
 					if (pGameObject->m_pMesh->GetType() & VERTEX_TYPE_NORMAL) {
 						pMaterial->SetIlluminatedShader();
 					}
 
-					pGameObject->m_pMaterials.push_back(pMaterial);
+					std::string strMaterialKey = std::format("MAT_{}_{}", pGameObject->m_strFrameName, i);
+					RESOURCE->AddMaterial(strMaterialKey, pMaterial);
+
+					pGameObject->m_pMaterials.push_back(RESOURCE->GetMaterial(strMaterialKey));
 				}
 			}
 			
@@ -236,7 +351,7 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 			pGameObject->m_pChildren.reserve(nChildren);
 			if (nChildren > 0) {
 				for (int i = 0; i < nChildren; ++i) {
-					std::shared_ptr<GameObject> pChild = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pGameObject, inFile);
+					std::shared_ptr<GameObject> pChild = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dRootSignature, pGameObject, inFile);
 					pGameObject->m_pChildren.push_back(pChild);
 				}
 			}
@@ -249,7 +364,7 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 	return pGameObject;
 }
 
-std::shared_ptr<GameObject> GameObject::LoadGeometryFromFile(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, std::string strFileName)
+std::shared_ptr<GameObject> GameObject::LoadGeometryFromFile(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, ComPtr<ID3D12RootSignature> pd3dRootSignature, const std::string& strFileName)
 {
 	std::ifstream inFile{ strFileName, std::ios::binary };
 	if (!inFile) {
@@ -263,7 +378,7 @@ std::shared_ptr<GameObject> GameObject::LoadGeometryFromFile(ComPtr<ID3D12Device
 		strRead = ::ReadStringFromFile(inFile);
 
 		if (strRead == "<Hierarchy>:") {
-			pGameObject = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, nullptr, inFile);
+			pGameObject = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dRootSignature, nullptr, inFile);
 		}
 		else if (strRead == "</Hierarchy>") {
 			break;

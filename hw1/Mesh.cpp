@@ -68,18 +68,18 @@ void Mesh::ReleaseUploadBuffers()
 	}
 }
 
-void Mesh::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet)
+void Mesh::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount)
 {
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
 	{
 		pd3dCommandList->IASetIndexBuffer(&(m_d3dSubSetIndexBufferViews[nSubSet]));
-		pd3dCommandList->DrawIndexedInstanced(m_nSubSetIndices[nSubSet], 1, 0, 0, 0);
+		pd3dCommandList->DrawIndexedInstanced(m_nSubSetIndices[nSubSet], nInstanceCount, 0, 0, 0);
 	}
 	else
 	{
-		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+		pd3dCommandList->DrawInstanced(m_nVertices, nInstanceCount, m_nOffset, 0);
 	}
 }
 
@@ -118,7 +118,7 @@ void IlluminatedMesh::ReleaseUploadBuffers()
 	}
 }
 
-void IlluminatedMesh::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet)
+void IlluminatedMesh::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount)
 {
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dPositionBufferView, m_d3dNormalBufferView };
@@ -127,10 +127,10 @@ void IlluminatedMesh::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, 
 	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
 	{
 		pd3dCommandList->IASetIndexBuffer(&(m_d3dSubSetIndexBufferViews[nSubSet]));
-		pd3dCommandList->DrawIndexedInstanced(m_nSubSetIndices[nSubSet], 1, 0, 0, 0);
+		pd3dCommandList->DrawIndexedInstanced(m_nSubSetIndices[nSubSet], nInstanceCount, 0, 0, 0);
 	}
 	else
 	{
-		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+		pd3dCommandList->DrawInstanced(m_nVertices, nInstanceCount, m_nOffset, 0);
 	}
 }

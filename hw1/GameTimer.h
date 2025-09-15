@@ -12,7 +12,7 @@ public:
 	void Stop();
 	void Reset();
 
-	unsigned long GameTimer::GetFrameRate(std::wstring_view wsvGameName, std::wstring& wstrString);
+	unsigned long GameTimer::GetFrameRate(const std::wstring& wsvGameName, std::wstring& wstrString);
 	float GetTimeElapsed();
 	float GetTotalTime();
 

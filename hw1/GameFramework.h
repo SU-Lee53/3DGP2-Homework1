@@ -2,6 +2,8 @@
 #include "GameTimer.h"
 #include "FrameResource.h"
 #include "Scene.h"
+#include "ResourceManager.h"
+#include "RenderManager.h"
 
 #define FRAME_BUFFER_WIDTH		640
 #define FRAME_BUFFER_HEIGHT		480
@@ -13,6 +15,7 @@ public:
 	GameFramework(HINSTANCE hInstance, HWND hWnd, UINT uiWidth, UINT uiHeight, bool bEnableDebugLayer);
 
 public:
+	void BuildObjects();
 	void Update();
 	void Render();
 
@@ -33,6 +36,9 @@ public:
 
 	POINT					m_ptOldCursorPos;
 	TSTRING					m_tstrFrameRate;
+
+	static std::unique_ptr<ResourceManager> g_pResourceManager;
+	static std::unique_ptr<RenderManager> g_pRenderManager;
 
 #pragma region D3D
 private:
@@ -88,3 +94,5 @@ private:
 #pragma endregion
 };
 
+#define RESOURCE GameFramework::g_pResourceManager
+#define RENDER GameFramework::g_pRenderManager

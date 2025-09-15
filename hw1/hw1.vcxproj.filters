@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\Shader">
+      <UniqueIdentifier>{c044177b-ef22-492e-bfbf-4e52691edb05}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -60,6 +63,15 @@
     <ClInclude Include="ConstantBuffer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="RenderManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="StructuredBuffer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="hw1.cpp">
@@ -101,6 +113,15 @@
     <ClCompile Include="ConstantBuffer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="RenderManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="StructuredBuffer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="hw1.rc">
@@ -114,5 +135,16 @@
     <Image Include="hw1.ico">
       <Filter>리소스 파일</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders.hlsl">
+      <Filter>소스 파일\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Light.hlsl">
+      <Filter>소스 파일\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Common.hlsl">
+      <Filter>소스 파일\Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

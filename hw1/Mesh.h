@@ -56,7 +56,7 @@ protected:
 
 public:
 	virtual void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList) {}
-	virtual void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet);
+	virtual void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount = 1);
 };
 
 class IlluminatedMesh : public Mesh
@@ -73,5 +73,5 @@ protected:
 	D3D12_VERTEX_BUFFER_VIEW	m_d3dNormalBufferView;
 
 public:
-	virtual void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet) override;
+	virtual void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount = 1) override;
 };

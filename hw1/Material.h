@@ -1,4 +1,5 @@
 #pragma once
+#include "Shader.h"
 
 struct MATERIALLOADINFO {
 	XMFLOAT4 xmf4AlbedoColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -42,18 +43,23 @@ public:
 	void SetShader(std::shared_ptr<Shader> pShader) { m_pShader = pShader; }
 	void SetIlluminatedShader() { SetShader(m_pIlluminatedShader); }
 
-	void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
+	void UpdateShaderVariable(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
+	void SetMaterialToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT uiRootParameterIndex);
+
+	void OnPrepareRender(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList) {
+		m_pShader->OnPrepareRender(pd3dCommandList);
+	}
 
 private:
 	std::shared_ptr<Shader> m_pShader;
 	std::shared_ptr<MaterialColors> m_pMaterialColors;
 	std::shared_ptr<ConstantBuffer> m_pMaterialCBuffer;
 
-protected:
+private:
 	static std::shared_ptr<Shader> m_pIlluminatedShader;
 
 public:
-	static void PrepareShaders(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, ComPtr<ID3D12RootSignature> pd3dGraphicsRootSignature);
+	static void PrepareShaders(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12RootSignature> pd3dRootSignature);
 
 };
 

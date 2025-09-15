@@ -65,7 +65,7 @@ void GameTimer::Tick(float fLockFPS)
 	if (m_nSampleCount > 0) m_fTimeElapsed /= m_nSampleCount;
 }
 
-unsigned long GameTimer::GetFrameRate(std::wstring_view wsvGameName, std::wstring& wstrString)
+unsigned long GameTimer::GetFrameRate(const std::wstring& wsvGameName, std::wstring& wstrString)
 {
 	wstrString = std::format(L"{} ({} FPS)", wsvGameName, m_nCurrentFrameRate);
 

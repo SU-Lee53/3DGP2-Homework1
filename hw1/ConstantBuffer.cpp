@@ -14,10 +14,14 @@ ConstantBuffer::ConstantBuffer(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12Gra
 	);
 
 	m_pd3dCBuffer->Map(0, NULL, &m_pMappedPtr);
-
 }
 
 ConstantBuffer::~ConstantBuffer()
 {
 	m_pd3dCBuffer->Unmap(0, NULL);
+}
+
+void ConstantBuffer::SetBufferToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT uiRootParameterIndex)
+{
+	pd3dCommandList->SetGraphicsRootConstantBufferView(uiRootParameterIndex, m_pd3dCBuffer->GetGPUVirtualAddress());
 }

@@ -6,6 +6,9 @@ UINT GameFramework::g_nMsaa4xQualityLevels = 0;
 UINT GameFramework::g_uiClientWidth = 0;
 UINT GameFramework::g_uiClientHeight = 0;
 
+std::unique_ptr<ResourceManager> GameFramework::g_pResourceManager = nullptr;
+std::unique_ptr<RenderManager> GameFramework::g_pRenderManager = nullptr;
+
 GameFramework::GameFramework(HINSTANCE hInstance, HWND hWnd, UINT uiWidth, UINT uiHeight, bool bEnableDebugLayer)
 {
 	m_hWnd = hWnd;
@@ -26,9 +29,53 @@ GameFramework::GameFramework(HINSTANCE hInstance, HWND hWnd, UINT uiWidth, UINT 
 
 	m_tstrFrameRate = L"3DGP2-Homework1";
 
-	m_pScene = std::make_shared<Scene>();
-	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	g_pResourceManager = std::make_unique<ResourceManager>();
+	g_pRenderManager = std::make_unique<RenderManager>(m_pd3dDevice, m_pd3dCommandList);
 
+	BuildObjects();
+}
+
+void GameFramework::BuildObjects()
+{
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+
+	// Build
+	{
+		m_pScene = std::make_shared<Scene>(m_pd3dDevice, m_pd3dCommandList);
+		m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	}
+
+	m_pd3dCommandList->Close();
+	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList.Get()};
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+	WaitForGPUComplete();
+}
+
+void GameFramework::Update()
+{
+	m_GameTimer.Tick(0.0f);
+
+	m_pScene->Update(m_GameTimer.GetTimeElapsed());
+}
+
+void GameFramework::Render()
+{
+	RenderBegin();
+
+	{
+		// TODO: Render Logic
+		m_pScene->Render(m_pd3dCommandList);
+		RENDER->Render(m_pd3dCommandList);
+	}
+
+	RenderEnd();
+	Present();
+	MoveToNextFrame();
+
+	TSTRING tstrFrameRate;
+	m_GameTimer.GetFrameRate(L"3DGP-Homework1", tstrFrameRate);
+	::SetWindowText(m_hWnd, tstrFrameRate.data());
 }
 
 void GameFramework::CreateFactory()
@@ -252,13 +299,6 @@ void GameFramework::ChangeSwapChainState()
 	}
 }
 
-void GameFramework::Update()
-{
-	m_GameTimer.Tick(0.0f);
-
-	m_pScene->Update(m_GameTimer.GetTimeElapsed());
-}
-
 void GameFramework::RenderBegin()
 {
 	HRESULT hr;
@@ -279,23 +319,6 @@ void GameFramework::RenderBegin()
 	m_pd3dCommandList->ClearRenderTargetView(m_FrameResources[m_nSwapChainBufferIndex].d3dRTVHandle, pfClearColor, 0, NULL);
 	m_pd3dCommandList->ClearDepthStencilView(d3dDSVHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.f, 0, 0, NULL);
 
-}
-
-void GameFramework::Render()
-{
-	RenderBegin();
-
-	{
-		// TODO: Render Logic
-	}
-
-	RenderEnd();
-	Present();
-	MoveToNextFrame();
-
-	TSTRING tstrFrameRate;
-	m_GameTimer.GetFrameRate(L"3DGP-Homework1", tstrFrameRate);
-	::SetWindowText(m_hWnd, tstrFrameRate.data());
 }
 
 void GameFramework::RenderEnd()
