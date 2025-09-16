@@ -31,6 +31,7 @@ class Mesh {
 public:
 	Mesh(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, const MESHLOADINFO& meshLoadInfo);
 
+	size_t GetSubSetCount() { return m_nSubMeshes; }
 	VERTEX_TYPE GetType() { return (VERTEX_TYPE)m_nType; }
 
 	virtual void ReleaseUploadBuffers();

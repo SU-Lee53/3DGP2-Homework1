@@ -61,6 +61,8 @@ public:
 	static UINT g_uiClientWidth;
 	static UINT g_uiClientHeight;
 
+	static UINT g_uiDescriptorHandleIncrementSize;
+
 	const static UINT g_nSwapChainBuffers = 2;
 
 private:

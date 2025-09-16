@@ -85,20 +85,21 @@ void Shader::OnPrepareRender(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, 
 	pd3dCommandList->SetPipelineState(m_pd3dPipelineState.Get());
 }
 
-D3D12_SHADER_BYTECODE Shader::CompileShaderFromFile(const std::wstring& wsvFileName, const std::string& svShaderName, const std::string& svShaderProfile, ID3DBlob** ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE Shader::CompileShaderFromFile(const std::wstring& wstrFileName, const std::string& strShaderName, const std::string& strShaderProfile, ID3DBlob** ppd3dShaderBlob)
 {
 	UINT nCompileFlags = 0;
-#if defined(_DEBUG)
+#ifdef _DEBUG
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
 	ComPtr<ID3DBlob> pd3dErrorBlob = nullptr;
-	HRESULT hResult = ::D3DCompileFromFile(wsvFileName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, svShaderName.data(), svShaderProfile.data(), nCompileFlags, 0, ppd3dShaderBlob, pd3dErrorBlob.GetAddressOf());
+	HRESULT hResult = ::D3DCompileFromFile(wstrFileName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, strShaderName.data(), strShaderProfile.data(), nCompileFlags, 0, ppd3dShaderBlob, pd3dErrorBlob.GetAddressOf());
 	char* pErrorString = NULL;
 	if (pd3dErrorBlob) {
 		pErrorString = (char*)pd3dErrorBlob->GetBufferPointer();
 		HWND hWnd = ::GetActiveWindow();
 		MessageBoxA(hWnd, pErrorString, NULL, 0);
+		OutputDebugStringA(pErrorString);
 		__debugbreak();
 	}
 	
@@ -109,9 +110,9 @@ D3D12_SHADER_BYTECODE Shader::CompileShaderFromFile(const std::wstring& wsvFileN
 	return(d3dShaderByteCode);
 }
 
-D3D12_SHADER_BYTECODE Shader::ReadCompiledShaderFromFile(const std::wstring& wsvFileName, ID3DBlob** ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE Shader::ReadCompiledShaderFromFile(const std::wstring& wstrFileName, ID3DBlob** ppd3dShaderBlob)
 {
-	std::ifstream in { wsvFileName.data(), std::ios::binary};
+	std::ifstream in { wstrFileName.data(), std::ios::binary};
 	
 	if (!in) {
 		__debugbreak();
@@ -164,6 +165,9 @@ void IlluminatedShader::Create(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12Roo
 	}
 
 	HRESULT hr = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineDesc, IID_PPV_ARGS(m_pd3dPipelineState.GetAddressOf()));
+	if (FAILED(hr)) {
+		__debugbreak();
+	}
 }
 
 D3D12_INPUT_LAYOUT_DESC IlluminatedShader::CreateInputLayout()
@@ -201,5 +205,5 @@ D3D12_SHADER_BYTECODE IlluminatedShader::CreateVertexShader()
 
 D3D12_SHADER_BYTECODE IlluminatedShader::CreatePixelShader()
 {
-	return CompileShaderFromFile(L"Shaders.hlsl", "PSMain", "ps_5_1", m_pd3dVertexShaderBlob.GetAddressOf());
+	return CompileShaderFromFile(L"Shaders.hlsl", "PSMain", "ps_5_1", m_pd3dPixelShaderBlob.GetAddressOf());
 }

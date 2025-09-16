@@ -9,8 +9,11 @@
 
 class StructuredBuffer {
 public:
-	StructuredBuffer(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT nDatas, size_t elementSize);
+	StructuredBuffer() = default;
+	StructuredBuffer(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT nDatas, size_t elementSize, bool bCreateView = false);
 	~StructuredBuffer();
+
+	void Create(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT nDatas, size_t elementSize, bool bCreateView = false);
 
 	template<typename T>
 	void UpdateData(std::vector<T> data, UINT offset = 0);
@@ -21,12 +24,16 @@ public:
 	template<typename T>
 	void UpdateData(const T& const data, UINT index);
 
-	void SetBufferToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT uiOffset, UINT uiElementSize, UINT uiRootParameterIndex);
+	void SetBufferToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT uiOffset, UINT uiElementSize, UINT uiRootParameterIndex) const;
 
-private: 
-	ComPtr<ID3D12Resource> m_pd3dSBuffer;
-	UINT m_nDatas = 0;
-	void* m_pMappedPtr;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(UINT offset = 0) const;
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(UINT offset = 0) const;
+
+private:
+	ComPtr<ID3D12DescriptorHeap>	m_pd3dSRVHeap = nullptr;
+	ComPtr<ID3D12Resource>			m_pd3dSBuffer = nullptr;
+	void*							m_pMappedPtr = nullptr;
+	UINT							m_nDatas = 0;
 
 };
 

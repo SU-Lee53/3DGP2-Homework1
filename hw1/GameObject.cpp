@@ -96,6 +96,7 @@ void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 void GameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+	m_xmOBB.Transform(m_xmOBBWorld, XMLoadFloat4x4(&m_xmf4x4World));
 
 	for (auto& pChild : m_pChildren) {
 		pChild->UpdateTransform(&m_xmf4x4World);
@@ -318,6 +319,7 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 				}
 				if (pMesh) {
 					pGameObject->m_pMesh = RESOURCE->GetMesh(pMeshLoadInfo->strMeshName);
+					BoundingOrientedBox::CreateFromPoints(pGameObject->m_xmOBB, pMeshLoadInfo->xmf3Positions.size(), pMeshLoadInfo->xmf3Positions.data(), sizeof(XMFLOAT3));
 				}
 			}
 		}

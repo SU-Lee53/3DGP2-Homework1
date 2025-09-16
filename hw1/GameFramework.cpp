@@ -5,6 +5,7 @@ bool GameFramework::g_bMsaa4xEnable = false;
 UINT GameFramework::g_nMsaa4xQualityLevels = 0;
 UINT GameFramework::g_uiClientWidth = 0;
 UINT GameFramework::g_uiClientHeight = 0;
+UINT GameFramework::g_uiDescriptorHandleIncrementSize = 0;
 
 std::unique_ptr<ResourceManager> GameFramework::g_pResourceManager = nullptr;
 std::unique_ptr<RenderManager> GameFramework::g_pRenderManager = nullptr;
@@ -31,6 +32,7 @@ GameFramework::GameFramework(HINSTANCE hInstance, HWND hWnd, UINT uiWidth, UINT 
 
 	g_pResourceManager = std::make_unique<ResourceManager>();
 	g_pRenderManager = std::make_unique<RenderManager>(m_pd3dDevice, m_pd3dCommandList);
+	g_uiDescriptorHandleIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	BuildObjects();
 }
@@ -65,8 +67,7 @@ void GameFramework::Render()
 
 	{
 		// TODO: Render Logic
-		m_pScene->Render(m_pd3dCommandList);
-		RENDER->Render(m_pd3dCommandList);
+		m_pScene->Render(m_pd3dDevice, m_pd3dCommandList);
 	}
 
 	RenderEnd();

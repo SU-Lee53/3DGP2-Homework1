@@ -5,40 +5,12 @@
 // Camera //
 ////////////
 
-cbuffer cbCameraInfo : register(b1)
+cbuffer cbCameraInfo : register(b0)
 {
     matrix gmtxView : packoffset(c0);
     matrix gmtxProjection : packoffset(c4);
     float3 gvCameraPosition : packoffset(c8);
 };
-
-////////////////
-// Per Object // 
-////////////////
-
-struct MATERIAL
-{
-    float4 m_cAmbient;
-    float4 m_cDiffuse;
-    float4 m_cSpecular; //a = power
-    float4 m_cEmissive;
-};
-
-cbuffer cbGameObjectInfo : register(b2)
-{
-    MATERIAL gMaterial : packoffset(c0);
-}
-
-/////////////////////
-// Instancing Data // 
-/////////////////////
-
-struct INSTANCE_DATA
-{
-    matrix mtxGameObject;
-};
-
-StructuredBuffer<INSTANCE_DATA> sbInstanceData : register(t0);
 
 
 ///////////
@@ -72,11 +44,39 @@ struct LIGHT
     float padding;
 };
 
-cbuffer cbLights : register(b3)
+cbuffer cbLights : register(b1)
 {
     LIGHT gLights[MAX_LIGHTS];
     float4 gcGlobalAmbientLight;
     int gnLights;
 };
+
+////////////////
+// Per Object // 
+////////////////
+
+struct MATERIAL
+{
+    float4 m_cAmbient;
+    float4 m_cDiffuse;
+    float4 m_cSpecular; //a = power
+    float4 m_cEmissive;
+};
+
+cbuffer cbGameObjectInfo : register(b2)
+{
+    MATERIAL gMaterial;
+};
+
+/////////////////////
+// Instancing Data // 
+/////////////////////
+
+struct INSTANCE_DATA
+{
+    matrix mtxGameObject;
+};
+
+StructuredBuffer<INSTANCE_DATA> sbInstanceData : register(t0);
 
 #endif

@@ -11,8 +11,9 @@ struct INSTANCE_DATA {
 };
 
 struct INSTANCE_KEY {
-	std::shared_ptr<Mesh> pMesh;
-	std::vector<std::shared_ptr<Material>> pMaterials;
+	std::shared_ptr<Mesh>					pMesh;
+	std::vector<std::shared_ptr<Material>>	pMaterials;
+	UINT									uiDescriptorCountPerInstance;
 
 	bool operator==(const INSTANCE_KEY& other) const noexcept {
 		return pMesh == other.pMesh && pMaterials == other.pMaterials;
@@ -34,13 +35,16 @@ public:
 
 	void Add(std::shared_ptr<GameObject> pGameObject);
 	void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
-
 	void Clear();
+
+	ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return m_pd3dDescriptorHeap; }
+	void SetDescriptorHeapToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList) const;
 
 private:
 	std::unordered_map<INSTANCE_KEY, std::vector<INSTANCE_DATA>> m_InstanceMap;
 
-	ComPtr<ID3D12Device> m_pd3dDevice = nullptr;	// GameFramewok::m_pd3dDevice 의 참조
+	ComPtr<ID3D12Device>			m_pd3dDevice = nullptr;	// GameFramewok::m_pd3dDevice 의 참조
+	ComPtr<ID3D12DescriptorHeap>	m_pd3dDescriptorHeap = nullptr;
+	StructuredBuffer				m_InstanceDataSBuffer;
 
-	std::shared_ptr<StructuredBuffer> m_pInstanceDataSBuffer;
 };

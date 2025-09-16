@@ -2,6 +2,15 @@
 #include "Mesh.h"
 #include "Material.h"
 
+enum MOVE_DIR : UINT {
+	MOVE_DIR_FORWARD		= 1,
+	MOVE_DIR_BACKWARD	= MOVE_DIR_FORWARD << 1,
+	MOVE_DIR_LEFT		= MOVE_DIR_BACKWARD << 1,
+	MOVE_DIR_RIGHT		= MOVE_DIR_LEFT << 1,
+	MOVE_DIR_UP			= MOVE_DIR_RIGHT << 1,
+	MOVE_DIR_DOWN		= MOVE_DIR_UP << 1,
+};
+
 struct CB_OBJECT_DATA {
 	XMFLOAT4X4 xmf4GameObject;
 	CB_MATERIAL_DATA materialData;
@@ -10,6 +19,8 @@ struct CB_OBJECT_DATA {
 class GameObject : public std::enable_shared_from_this<GameObject> {
 
 public:
+	virtual void Update(float fTimeElapsed) {}
+
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
@@ -38,7 +49,9 @@ public:
 	std::shared_ptr<Mesh> GetMesh() const { return m_pMesh; }
 	std::vector<std::shared_ptr<Material>>& GetMaterials() { return m_pMaterials; }
 
-private:
+	const BoundingOrientedBox& GetOBBWorld() const { return m_xmOBBWorld; }
+
+protected:
 	std::string m_strFrameName;
 
 	std::shared_ptr<Mesh> m_pMesh;
@@ -50,6 +63,9 @@ private:
 
 	std::shared_ptr<GameObject> m_pParent;
 	std::vector<std::shared_ptr<GameObject>> m_pChildren;
+
+	BoundingOrientedBox m_xmOBB;
+	BoundingOrientedBox m_xmOBBWorld;
 
 
 public:

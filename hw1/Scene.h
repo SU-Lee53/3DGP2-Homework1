@@ -1,7 +1,6 @@
 #pragma once
 #include "Light.h"
-
-class GameObject;
+#include "Player.h"
 
 #define MAX_LIGHTS 16
 
@@ -16,23 +15,37 @@ public:
 	Scene(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 
 public:
+	void BuildDefaultLightsAndMaterials();
 	void BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 	void Update(float fTimeElapsed);
-	void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
+	void Render(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 
-	void UpdateShaderVariable(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
+	virtual void CreateShaderVariables(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
+	virtual void UpdateShaderVariable(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 
 private:
 	void CreateRootSignature(ComPtr<ID3D12Device> pd3dDevice);
 
+public:
+	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+
+public:
+	std::shared_ptr<Camera> GetCamera();
+	const ConstantBuffer& GetCBuffer() const { return m_LightCBuffer; }
+
 private:
+	std::shared_ptr<Player>						m_pPlayer;
 	std::vector<std::shared_ptr<GameObject>>	m_pGameObjects;
 	std::vector<std::shared_ptr<Light>>			m_pLights;
 	XMFLOAT4									m_xmf4GlobalAmbient;
 
-	std::shared_ptr<ConstantBuffer>				m_cbLights;
+	ConstantBuffer								m_LightCBuffer;
 
 private:
 	ComPtr<ID3D12RootSignature> m_pd3dRootSignature;
+
+public:
+	const static UINT g_uiDescriptorCountPerScene = 2;	// Camera + Lights
 };
 

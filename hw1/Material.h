@@ -50,10 +50,12 @@ public:
 		m_pShader->OnPrepareRender(pd3dCommandList);
 	}
 
+	const ConstantBuffer& GetCBuffer() const { return m_MaterialCBuffer; }
+
 private:
 	std::shared_ptr<Shader> m_pShader;
 	std::shared_ptr<MaterialColors> m_pMaterialColors;
-	std::shared_ptr<ConstantBuffer> m_pMaterialCBuffer;
+	ConstantBuffer m_MaterialCBuffer;
 
 private:
 	static std::shared_ptr<Shader> m_pIlluminatedShader;
