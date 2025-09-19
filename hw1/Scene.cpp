@@ -12,8 +12,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 
 	Material::PrepareShaders(pd3dDevice, m_pd3dRootSignature);
 
-	std::shared_ptr<GameObject> pMi24Model = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Mi24.bin");
-	__debugbreak();
+	std::shared_ptr<GameObject> pMi24Model = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Mi24.bin");	__debugbreak();
 }
 
 void Scene::Update(float fTimeElapsed)
@@ -92,6 +91,7 @@ void Scene::CreateRootSignature(ComPtr<ID3D12Device> pd3dDevice)
 		d3dMaterialDescriptorRange.OffsetInDescriptorsFromTableStart = 0;
 	}
 	
+#ifdef INSTANCING_USING_DESCRIPTOR_TABLE
 	D3D12_DESCRIPTOR_RANGE d3dInstancingDataDescriptorRange{};
 	{
 		d3dInstancingDataDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -100,6 +100,7 @@ void Scene::CreateRootSignature(ComPtr<ID3D12Device> pd3dDevice)
 		d3dInstancingDataDescriptorRange.RegisterSpace = 0;
 		d3dInstancingDataDescriptorRange.OffsetInDescriptorsFromTableStart = 0;
 	}
+#endif
 
 	D3D12_ROOT_PARAMETER d3dRootParameters[3];
 	{
@@ -109,17 +110,27 @@ void Scene::CreateRootSignature(ComPtr<ID3D12Device> pd3dDevice)
 		d3dRootParameters[0].DescriptorTable.pDescriptorRanges = &d3dPerSceneDescriptorRange;
 		d3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-		// Instance data
+		// Material
 		d3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 		d3dRootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
-		d3dRootParameters[1].DescriptorTable.pDescriptorRanges = &d3dInstancingDataDescriptorRange;
+		d3dRootParameters[1].DescriptorTable.pDescriptorRanges = &d3dMaterialDescriptorRange;
 		d3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-		// Material
+		// Instance data
+#ifdef INSTANCING_USING_DESCRIPTOR_TABLE
 		d3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 		d3dRootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
-		d3dRootParameters[2].DescriptorTable.pDescriptorRanges = &d3dMaterialDescriptorRange;
+		d3dRootParameters[2].DescriptorTable.pDescriptorRanges = &d3dInstancingDataDescriptorRange;
 		d3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+#else
+		d3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+		d3dRootParameters[2].Descriptor.ShaderRegister = 0;
+		d3dRootParameters[2].Descriptor.RegisterSpace = 0;
+		d3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+#endif // INSTANCING_USING_DESCRIPTOR_TABLE
+
 	}
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT

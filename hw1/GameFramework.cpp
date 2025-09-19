@@ -63,6 +63,8 @@ void GameFramework::Update()
 
 void GameFramework::Render()
 {
+	RENDER->Clear();
+
 	RenderBegin();
 
 	{

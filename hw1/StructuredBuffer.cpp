@@ -27,7 +27,6 @@ void StructuredBuffer::Create(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12Grap
 
 	m_pd3dSBuffer->Map(0, NULL, (void**)&m_pMappedPtr);
 
-
 	if (bCreateView) {
 		HRESULT hr;
 

@@ -8,7 +8,15 @@ RenderManager::RenderManager(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12Graph
 {
 	m_pd3dDevice = pd3dDevice;
 
-	m_InstanceDataSBuffer.Create(pd3dDevice, pd3dCommandList, MAX_INSTANCING_COUNT, sizeof(INSTANCE_DATA));
+#ifdef INSTANCING_USING_DESCRIPTOR_TABLE
+	m_InstanceDataSBuffer.Create(pd3dDevice, pd3dCommandList, MAX_INSTANCING_COUNT, sizeof(INSTANCE_DATA), true);
+
+#else
+	m_InstanceDataSBuffer.Create(pd3dDevice, pd3dCommandList, MAX_INSTANCING_COUNT, sizeof(INSTANCE_DATA), false);
+
+#endif
+
+
 
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc{};
 	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -63,13 +71,18 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 	for (auto&& [instanceKey, instanceData] : m_InstanceMap) {
 		m_InstanceDataSBuffer.UpdateData(instanceData, uiSBufferOffset);
 
+#ifdef INSTANCING_USING_DESCRIPTOR_TABLE
 		m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, m_InstanceDataSBuffer.GetCPUDescriptorHandle(uiSBufferOffset), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		d3dCPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
 		uiDescriptorOffset++;
 
-		pd3dCommandList->SetGraphicsRootDescriptorTable(1, d3dGPUHandle);
+		pd3dCommandList->SetGraphicsRootDescriptorTable(2, d3dGPUHandle);
 		d3dGPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
 
+#else
+		m_InstanceDataSBuffer.SetBufferToPipeline(pd3dCommandList, 0, 0, 2);
+
+#endif
 		for (int i = 0; i < instanceKey.pMaterials.size(); ++i) {
 			instanceKey.pMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 			m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, instanceKey.pMaterials[i]->GetCBuffer().GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -80,7 +93,7 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 		for (int i = 0; i < instanceKey.pMaterials.size(); ++i) {
 			instanceKey.pMaterials[i]->OnPrepareRender(pd3dCommandList);
 
-			pd3dCommandList->SetGraphicsRootDescriptorTable(2, d3dGPUHandle);
+			pd3dCommandList->SetGraphicsRootDescriptorTable(1, d3dGPUHandle);
 			d3dGPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
 
 			instanceKey.pMesh->Render(pd3dCommandList, i, instanceData.size());

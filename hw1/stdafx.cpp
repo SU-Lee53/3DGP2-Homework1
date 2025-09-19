@@ -28,8 +28,8 @@ ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> pd3dDevice, Com
 	d3dResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 	D3D12_RESOURCE_STATES d3dResourceInitialStates = D3D12_RESOURCE_STATE_COMMON;
-	//	if (d3dHeapType == D3D12_HEAP_TYPE_UPLOAD) d3dResourceInitialStates = D3D12_RESOURCE_STATE_GENERIC_READ;
-	//	else if (d3dHeapType == D3D12_HEAP_TYPE_READBACK) d3dResourceInitialStates = D3D12_RESOURCE_STATE_COPY_DEST;
+	if (d3dHeapType == D3D12_HEAP_TYPE_UPLOAD) d3dResourceInitialStates = D3D12_RESOURCE_STATE_GENERIC_READ;
+	else if (d3dHeapType == D3D12_HEAP_TYPE_READBACK) d3dResourceInitialStates = D3D12_RESOURCE_STATE_COPY_DEST;
 
 	HRESULT hResult = pd3dDevice->CreateCommittedResource(
 		&d3dHeapPropertiesDesc, 
