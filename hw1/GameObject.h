@@ -19,7 +19,8 @@ struct CB_OBJECT_DATA {
 class GameObject : public std::enable_shared_from_this<GameObject> {
 
 public:
-	virtual void Update(float fTimeElapsed) {}
+	virtual void Initialize() {}
+	virtual void Update(float fTimeElapsed);
 
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
@@ -51,7 +52,7 @@ public:
 
 	const BoundingOrientedBox& GetOBBWorld() const { return m_xmOBBWorld; }
 
-protected:
+public:
 	std::string m_strFrameName;
 
 	std::shared_ptr<Mesh> m_pMesh;
@@ -77,3 +78,128 @@ public:
 
 };
 
+class RotatingObject : public GameObject
+{
+public:
+	RotatingObject();
+	virtual ~RotatingObject();
+
+private:
+	XMFLOAT3					m_xmf3RotationAxis;
+	float						m_fRotationSpeed;
+
+public:
+	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
+	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
+
+	virtual void Update(float fTimeElapsed) override;
+};
+
+class RevolvingObject : public GameObject
+{
+public:
+	RevolvingObject();
+	virtual ~RevolvingObject();
+
+private:
+	XMFLOAT3					m_xmf3RevolutionAxis;
+	float						m_fRevolutionSpeed;
+
+public:
+	void SetRevolutionSpeed(float fRevolutionSpeed) { m_fRevolutionSpeed = fRevolutionSpeed; }
+	void SetRevolutionAxis(XMFLOAT3 xmf3RevolutionAxis) { m_xmf3RevolutionAxis = xmf3RevolutionAxis; }
+
+	virtual void Update(float fTimeElapsed) override;
+};
+
+class HellicopterObject : public GameObject
+{
+public:
+	HellicopterObject();
+	virtual ~HellicopterObject();
+
+protected:
+	std::shared_ptr<GameObject> m_pMainRotorFrame = NULL;
+	std::shared_ptr<GameObject> m_pTailRotorFrame = NULL;
+
+public:
+	virtual void Initialize() override;
+	virtual void Update(float fTimeElapsed) override;
+};
+
+class ApacheObject : public HellicopterObject
+{
+public:
+	ApacheObject();
+	virtual ~ApacheObject();
+
+public:
+	virtual void Initialize() override;
+	virtual void Update(float fTimeElapsed) override;
+};
+
+class GunshipObject : public HellicopterObject
+{
+public:
+	GunshipObject();
+	virtual ~GunshipObject();
+
+public:
+	virtual void Initialize() override;
+};
+
+class SuperCobraObject : public HellicopterObject
+{
+public:
+	SuperCobraObject();
+	virtual ~SuperCobraObject();
+
+public:
+	virtual void Initialize() override;
+};
+
+class Mi24Object : public HellicopterObject
+{
+public:
+	Mi24Object();
+	virtual ~Mi24Object();
+
+public:
+	virtual void Initialize() override;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class HummerObject : public GameObject
+{
+public:
+	HummerObject();
+	virtual ~HummerObject();
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class TankObject : public GameObject
+{
+public:
+	TankObject();
+	virtual ~TankObject();
+
+protected:
+	std::shared_ptr<GameObject> m_pTurretFrame = NULL;
+	std::shared_ptr<GameObject> m_pCannonFrame = NULL;
+	std::shared_ptr<GameObject> m_pGunFrame = NULL;
+
+public:
+	virtual void Initialize() override;
+	virtual void Update(float fTimeElapsed) override;
+};
+
+class M26Object : public TankObject
+{
+public:
+	M26Object();
+	virtual ~M26Object();
+
+	virtual void Initialize() override;
+};

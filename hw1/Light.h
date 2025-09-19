@@ -24,7 +24,10 @@ enum LIGHT_TYPE : int {
 
 class Light {
 public:
-    virtual CB_LIGHT_DATA MakeLightData() {}
+    virtual CB_LIGHT_DATA MakeLightData() { return CB_LIGHT_DATA{}; }
+
+public:
+    bool m_bEnable;
 };
 
 class PointLight : public Light {
@@ -36,6 +39,7 @@ public:
     XMFLOAT4    m_xmf4Specular;
 
     XMFLOAT3    m_xmf3Position;
+    XMFLOAT3    m_xmf3Direction;
 
     float       m_fRange;
     float       m_fAttenuation0;

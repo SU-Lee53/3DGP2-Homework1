@@ -54,10 +54,55 @@ void GameFramework::BuildObjects()
 	WaitForGPUComplete();
 }
 
+void GameFramework::ProcessInput()
+{
+	static UCHAR pKeysBuffer[256];
+	bool bProcessedByScene = false;
+	
+	if (GetKeyboardState(pKeysBuffer) && m_pScene) {
+		bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
+	}
+		
+	if (!bProcessedByScene)
+	{
+		DWORD dwDirection = 0;
+		if (pKeysBuffer[VK_UP] & 0xF0)		dwDirection |= MOVE_DIR_FORWARD;
+		if (pKeysBuffer[VK_DOWN] & 0xF0)	dwDirection |= MOVE_DIR_BACKWARD;
+		if (pKeysBuffer[VK_LEFT] & 0xF0)	dwDirection |= MOVE_DIR_LEFT;
+		if (pKeysBuffer[VK_RIGHT] & 0xF0)	dwDirection |= MOVE_DIR_RIGHT;
+		if (pKeysBuffer[VK_PRIOR] & 0xF0)	dwDirection |= MOVE_DIR_UP;
+		if (pKeysBuffer[VK_NEXT] & 0xF0)	dwDirection |= MOVE_DIR_DOWN;
+
+		float cxDelta = 0.0f, cyDelta = 0.0f;
+		POINT ptCursorPos;
+		if (GetCapture() == m_hWnd)
+		{
+			SetCursor(NULL);
+			GetCursorPos(&ptCursorPos);
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		}
+
+		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+		{
+			auto pPlayer = m_pScene->GetPlayer();
+			if (cxDelta || cyDelta)
+			{
+				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+					pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+				else
+					pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+			}
+			if (dwDirection) pPlayer->Move(dwDirection, 1.5f, true);
+		}
+	}
+}
+
 void GameFramework::Update()
 {
 	m_GameTimer.Tick(0.0f);
-
+	ProcessInput();
 	m_pScene->Update(m_GameTimer.GetTimeElapsed());
 }
 
@@ -364,7 +409,10 @@ void GameFramework::MoveToNextFrame()
 
 void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	//if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	if (m_pScene) {
+		m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	}
+
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
@@ -385,7 +433,10 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 
 void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	//if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+	if (m_pScene) {
+		m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+	}
+
 	switch (nMessageID)
 	{
 	case WM_KEYUP:

@@ -16,6 +16,7 @@ public:
 
 public:
 	void BuildObjects();
+	void ProcessInput();
 	void Update();
 	void Render();
 

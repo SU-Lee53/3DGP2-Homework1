@@ -17,6 +17,7 @@ public:
 public:
 	void BuildDefaultLightsAndMaterials();
 	void BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
+	bool ProcessInput(UCHAR* pKeysBuffer);
 	void Update(float fTimeElapsed);
 	void Render(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 
@@ -31,13 +32,14 @@ public:
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 public:
-	std::shared_ptr<Camera> GetCamera();
+	std::shared_ptr<Camera> GetCamera() const;
 	const ConstantBuffer& GetCBuffer() const { return m_LightCBuffer; }
+	std::shared_ptr<Player> GetPlayer() const;
 
 private:
 	std::shared_ptr<Player>						m_pPlayer;
 	std::vector<std::shared_ptr<GameObject>>	m_pGameObjects;
-	std::vector<std::shared_ptr<Light>>			m_pLights;
+	std::vector<Light>							m_Lights;
 	XMFLOAT4									m_xmf4GlobalAmbient;
 
 	ConstantBuffer								m_LightCBuffer;

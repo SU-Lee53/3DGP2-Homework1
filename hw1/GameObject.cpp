@@ -1,7 +1,12 @@
 #include "stdafx.h"
 #include "GameObject.h"
 
-
+void GameObject::Update(float fTimeElapsed) 
+{
+	for (auto pChild : m_pChildren) {
+		pChild->Update(fTimeElapsed);
+	}
+}
 
 XMFLOAT3 GameObject::GetPosition()
 {
@@ -350,11 +355,16 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 		else if (strRead == "<Children>:") {
 			int nChildren;
 			inFile.read((char*)&nChildren, sizeof(int));
-			pGameObject->m_pChildren.reserve(nChildren);
+			if (pGameObject) {
+				pGameObject->m_pChildren.reserve(nChildren);
+			}
+
 			if (nChildren > 0) {
 				for (int i = 0; i < nChildren; ++i) {
 					std::shared_ptr<GameObject> pChild = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dRootSignature, pGameObject, inFile);
-					pGameObject->m_pChildren.push_back(pChild);
+					if (pGameObject) {
+						pGameObject->m_pChildren.push_back(pChild);
+					}
 				}
 			}
 		}
@@ -388,4 +398,224 @@ std::shared_ptr<GameObject> GameObject::LoadGeometryFromFile(ComPtr<ID3D12Device
 	}
 
 	return pGameObject;
+}
+
+////////////////////
+// RotatingObject //
+////////////////////
+
+RotatingObject::RotatingObject()
+{
+	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fRotationSpeed = 15.0f;
+}
+
+RotatingObject::~RotatingObject()
+{
+}
+
+void RotatingObject::Update(float fTimeElapsed)
+{
+	GameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
+	GameObject::Update(fTimeElapsed);
+}
+
+////////////////////
+// RotatingObject //
+////////////////////
+
+RevolvingObject::RevolvingObject()
+{
+	m_xmf3RevolutionAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	m_fRevolutionSpeed = 0.0f;
+}
+
+RevolvingObject::~RevolvingObject()
+{
+}
+
+void RevolvingObject::Update(float fTimeElapsed)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed));
+	m_xmf4x4Transform = Matrix4x4::Multiply(m_xmf4x4Transform, mtxRotate);
+
+	GameObject::Update(fTimeElapsed);
+}
+
+///////////////////////
+// HellicopterObject //
+///////////////////////
+
+HellicopterObject::HellicopterObject()
+{
+}
+
+HellicopterObject::~HellicopterObject()
+{
+}
+
+void HellicopterObject::Initialize()
+{
+}
+
+void HellicopterObject::Update(float fTimeElapsed)
+{
+	if (m_pMainRotorFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+	}
+	if (m_pTailRotorFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
+		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+	}
+
+	GameObject::Update(fTimeElapsed);
+}
+
+//////////////////
+// ApacheObject //
+//////////////////
+
+ApacheObject::ApacheObject()
+{
+}
+
+ApacheObject::~ApacheObject()
+{
+}
+
+void ApacheObject::Initialize()
+{
+	m_pMainRotorFrame = FindFrame("rotor");
+	m_pTailRotorFrame = FindFrame("black_m_7");
+}
+
+void ApacheObject::Update(float fTimeElapsed)
+{
+	if (m_pMainRotorFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+	}
+	if (m_pTailRotorFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
+		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+	}
+
+	GameObject::Update(fTimeElapsed);
+}
+
+///////////////////
+// GunshipObject //
+///////////////////
+
+GunshipObject::GunshipObject()
+{
+}
+
+GunshipObject::~GunshipObject()
+{
+}
+
+void GunshipObject::Initialize()
+{
+	m_pMainRotorFrame = FindFrame("Rotor");
+	m_pTailRotorFrame = FindFrame("Back_Rotor");
+}
+
+//////////////////////
+// SuperCobraObject //
+//////////////////////
+
+SuperCobraObject::SuperCobraObject()
+{
+}
+
+SuperCobraObject::~SuperCobraObject()
+{
+}
+
+void SuperCobraObject::Initialize()
+{
+	m_pMainRotorFrame = FindFrame("MainRotor_LOD0");
+	m_pTailRotorFrame = FindFrame("TailRotor_LOD0");
+}
+
+////////////////
+// Mi24Object //
+////////////////
+
+Mi24Object::Mi24Object()
+{
+}
+
+Mi24Object::~Mi24Object()
+{
+}
+
+void Mi24Object::Initialize()
+{
+	m_pMainRotorFrame = FindFrame("Top_Rotor");
+	m_pTailRotorFrame = FindFrame("Tail_Rotor");
+}
+
+//////////////////
+// HummerObject //
+//////////////////
+
+HummerObject::HummerObject()
+{
+}
+
+HummerObject::~HummerObject()
+{
+}
+
+////////////////
+// TankObject //
+////////////////
+
+TankObject::TankObject()
+{
+}
+
+TankObject::~TankObject()
+{
+}
+
+void TankObject::Initialize()
+{
+}
+
+void TankObject::Update(float fTimeElapsed)
+{
+	if (m_pTurretFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(30.0f) * fTimeElapsed);
+		m_pTurretFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTurretFrame->m_xmf4x4Transform);
+	}
+
+	GameObject::Update(fTimeElapsed);
+}
+
+///////////////
+// M26Object //
+///////////////
+
+M26Object::M26Object()
+{
+}
+
+M26Object::~M26Object()
+{
+}
+
+void M26Object::Initialize()
+{
+	m_pTurretFrame = FindFrame("TURRET");
+	m_pCannonFrame = FindFrame("cannon");
+	m_pGunFrame = FindFrame("gun");
 }
