@@ -29,6 +29,11 @@ RenderManager::RenderManager(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12Graph
 
 void RenderManager::Add(std::shared_ptr<GameObject> pGameObject)
 {
+	// Mesh 가 없으면 렌더링 필요가 없음
+	if (!pGameObject->GetMesh()) {
+		return;
+	}
+
 	INSTANCE_KEY key{};
 	key.pMesh = pGameObject->GetMesh();
 	key.pMaterials = pGameObject->GetMaterials();
@@ -72,7 +77,7 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 		m_InstanceDataSBuffer.UpdateData(instanceData, uiSBufferOffset);
 
 #ifdef INSTANCING_USING_DESCRIPTOR_TABLE
-		m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, m_InstanceDataSBuffer.GetCPUDescriptorHandle(uiSBufferOffset), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, m_InstanceDataSBuffer.GetCPUDescriptorHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		d3dCPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
 		uiDescriptorOffset++;
 
@@ -83,6 +88,12 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 		m_InstanceDataSBuffer.SetBufferToPipeline(pd3dCommandList, 0, 0, 2);
 
 #endif
+		int nBase = uiSBufferOffset;
+		int nInstanceCount = instanceData.size();
+
+		pd3dCommandList->SetGraphicsRoot32BitConstant(3, nBase, 0);
+		pd3dCommandList->SetGraphicsRoot32BitConstant(3, nInstanceCount, 1);
+
 		for (int i = 0; i < instanceKey.pMaterials.size(); ++i) {
 			instanceKey.pMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 			m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, instanceKey.pMaterials[i]->GetCBuffer().GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -96,7 +107,7 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 			pd3dCommandList->SetGraphicsRootDescriptorTable(1, d3dGPUHandle);
 			d3dGPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
 
-			instanceKey.pMesh->Render(pd3dCommandList, i, instanceData.size());
+			instanceKey.pMesh->AddToRenderMap(pd3dCommandList, i, instanceData.size());
 		}
 
 		uiSBufferOffset += instanceData.size();

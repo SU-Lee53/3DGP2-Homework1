@@ -11,8 +11,8 @@ Camera::Camera()
 	m_xmf4x4View = Matrix4x4::Identity();
 	m_xmf4x4InverseView = Matrix4x4::Identity();
 	m_xmf4x4Projection = Matrix4x4::Identity();
-	m_d3dViewport = { 0, 0, FRAME_BUFFER_WIDTH , FRAME_BUFFER_HEIGHT, 0.0f, 1.0f };
-	m_d3dScissorRect = { 0, 0, FRAME_BUFFER_WIDTH , FRAME_BUFFER_HEIGHT };
+	m_d3dViewport = { 0, 0, (float)GameFramework::g_nClientWidth , (float)GameFramework::g_nClientHeight, 0.0f, 1.0f };
+	m_d3dScissorRect = { 0, 0, (long)GameFramework::g_nClientWidth , (long)GameFramework::g_nClientHeight };
 	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
@@ -27,24 +27,30 @@ Camera::Camera()
 	m_pPlayer = nullptr;
 }
 
-Camera::Camera(const Camera& other)
+Camera::Camera(const std::shared_ptr<Camera> pOther)
 {
-	m_xmf4x4View = other.m_xmf4x4View;
-	m_xmf4x4Projection = other.m_xmf4x4Projection;
-	m_d3dViewport = other.m_d3dViewport;
-	m_d3dScissorRect = other.m_d3dScissorRect;
-	m_xmf3Position = other.m_xmf3Position;
-	m_xmf3Right = other.m_xmf3Right;
-	m_xmf3Look = other.m_xmf3Look;
-	m_xmf3Up = other.m_xmf3Up;
-	m_fPitch = other.m_fPitch;
-	m_fRoll = other.m_fRoll;
-	m_fYaw = other.m_fYaw;
-	m_xmf3Offset = other.m_xmf3Offset;
-	m_fTimeLag = other.m_fTimeLag;
-	m_xmf3LookAtWorld = other.m_xmf3LookAtWorld;
-	m_nMode = other.m_nMode;
-	m_pPlayer = other.m_pPlayer;
+	if (pOther) {
+		*this = *pOther;
+	}
+	else {
+		m_xmf4x4View = Matrix4x4::Identity();
+		m_xmf4x4InverseView = Matrix4x4::Identity();
+		m_xmf4x4Projection = Matrix4x4::Identity();
+		m_d3dViewport = { 0, 0, (float)GameFramework::g_nClientWidth , (float)GameFramework::g_nClientHeight, 0.0f, 1.0f };
+		m_d3dScissorRect = { 0, 0, (long)GameFramework::g_nClientWidth , (long)GameFramework::g_nClientHeight };
+		m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+		m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+		m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		m_fPitch = 0.0f;
+		m_fRoll = 0.0f;
+		m_fYaw = 0.0f;
+		m_xmf3Offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_fTimeLag = 0.0f;
+		m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_nMode = 0x00;
+		m_pPlayer = nullptr;
+	}
 }
 
 void Camera::CreateShaderVariables(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
@@ -146,10 +152,15 @@ bool Camera::IsInFrustum(const BoundingOrientedBox& xmBoundingBox) const
 // SpaceShipCamera //
 /////////////////////
 
-SpaceShipCamera::SpaceShipCamera(const Camera& other)
-	:Camera(other)
+SpaceShipCamera::SpaceShipCamera()
 {
-	m_nMode = CAMERA_MODE_SPACESHIP_CAMERA;
+	m_nMode = CAMERA_MODE_THIRD_PERSON;
+}
+
+SpaceShipCamera::SpaceShipCamera(const std::shared_ptr<Camera> pOther)
+	: Camera(pOther)
+{
+	m_nMode = CAMERA_MODE_SPACESHIP;
 }
 
 void SpaceShipCamera::Rotate(float fPitch, float fYaw, float fRoll)
@@ -193,17 +204,24 @@ void SpaceShipCamera::Rotate(float fPitch, float fYaw, float fRoll)
 // FirstPersonCamera //
 ///////////////////////
 
-FirstPersonCamera::FirstPersonCamera(const Camera& other)
-	:Camera(other)
+FirstPersonCamera::FirstPersonCamera()
 {
-	m_nMode = CAMERA_MODE_FIRST_PERSON_CAMERA;
+	m_nMode = CAMERA_MODE_THIRD_PERSON;
+}
 
-	if (other.GetMode() == CAMERA_MODE_SPACESHIP_CAMERA) {
-		m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-		m_xmf3Right.y = 0.0f;
-		m_xmf3Look.y = 0.0f;
-		m_xmf3Right = Vector3::Normalize(m_xmf3Right);
-		m_xmf3Look = Vector3::Normalize(m_xmf3Look);
+FirstPersonCamera::FirstPersonCamera(const std::shared_ptr<Camera> pOther)
+	: Camera(pOther)
+{
+	m_nMode = CAMERA_MODE_FIRST_PERSON;
+
+	if (pOther) {
+		if (pOther->GetMode() == CAMERA_MODE_SPACESHIP) {
+			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			m_xmf3Right.y = 0.0f;
+			m_xmf3Look.y = 0.0f;
+			m_xmf3Right = Vector3::Normalize(m_xmf3Right);
+			m_xmf3Look = Vector3::Normalize(m_xmf3Look);
+		}
 	}
 }
 
@@ -248,22 +266,30 @@ void FirstPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
 // ThirdPersonCamera //
 ///////////////////////
 
-ThirdPersonCamera::ThirdPersonCamera(const Camera& other)
-	:Camera(other)
+ThirdPersonCamera::ThirdPersonCamera()
 {
-	m_nMode = CAMERA_MODE_THIRD_PERSON_CAMERA;
+	m_nMode = CAMERA_MODE_THIRD_PERSON;
+}
 
-	if (other.GetMode() == CAMERA_MODE_SPACESHIP_CAMERA) {
-		m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-		m_xmf3Right.y = 0.0f;
-		m_xmf3Look.y = 0.0f;
-		m_xmf3Right = Vector3::Normalize(m_xmf3Right);
-		m_xmf3Look = Vector3::Normalize(m_xmf3Look);
+ThirdPersonCamera::ThirdPersonCamera(const std::shared_ptr<Camera> pOther)
+	: Camera(pOther)
+{
+	m_nMode = CAMERA_MODE_THIRD_PERSON;
+
+	if (pOther) {
+		if (pOther->GetMode() == CAMERA_MODE_SPACESHIP) {
+			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			m_xmf3Right.y = 0.0f;
+			m_xmf3Look.y = 0.0f;
+			m_xmf3Right = Vector3::Normalize(m_xmf3Right);
+			m_xmf3Look = Vector3::Normalize(m_xmf3Look);
+		}
 	}
 }
 
 void ThirdPersonCamera::Update(const XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
+	fTimeElapsed = fTimeElapsed == 0.f ? 0.0017f : fTimeElapsed;
 	if (m_pPlayer)
 	{
 		XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();

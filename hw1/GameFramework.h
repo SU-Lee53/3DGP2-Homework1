@@ -1,13 +1,9 @@
 #pragma once
 #include "GameTimer.h"
-#include "FrameResource.h"
 #include "Scene.h"
 #include "ResourceManager.h"
 #include "RenderManager.h"
-
-#define FRAME_BUFFER_WIDTH		640
-#define FRAME_BUFFER_HEIGHT		480
-
+//
 class Scene;
 
 class GameFramework {
@@ -48,6 +44,11 @@ private:
 	void CreateFence();
 	void CreateSwapChain();
 	void CreateCommandList();
+	void CreateRtvAndDsvDescriptorHeaps();
+	void CreateRenderTargetViews();
+	void CreateDepthStencilView();
+
+
 
 private:
 	void WaitForGPUComplete();
@@ -59,8 +60,8 @@ public:
 	static bool g_bMsaa4xEnable;
 	static UINT g_nMsaa4xQualityLevels;
 
-	static UINT g_uiClientWidth;
-	static UINT g_uiClientHeight;
+	static long g_nClientWidth;
+	static long g_nClientHeight;
 
 	static UINT g_uiDescriptorHandleIncrementSize;
 
@@ -75,11 +76,20 @@ private:
 	ComPtr<IDXGISwapChain3>	m_pdxgiSwapChain;
 	UINT					m_nSwapChainBufferIndex = 0;
 
-	// RTV + DSV
-	FrameResource m_FrameResources[g_nSwapChainBuffers];
-
 	// Device
-	ComPtr<ID3D12Device> m_pd3dDevice;
+	ComPtr<ID3D12Device>				m_pd3dDevice;
+
+	// RTV + DSV
+	//FrameResource m_FrameResources[g_nSwapChainBuffers];
+	static const UINT			m_nSwapChainBuffers = 2;
+
+	ComPtr<ID3D12Resource>				m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
+	ComPtr<ID3D12DescriptorHeap>		m_pd3dRtvDescriptorHeap = NULL;
+	UINT								m_nRtvDescriptorIncrementSize;
+
+	ComPtr<ID3D12Resource>				m_pd3dDepthStencilBuffer = NULL;
+	ComPtr<ID3D12DescriptorHeap>		m_pd3dDsvDescriptorHeap = NULL;
+	UINT								m_nDsvDescriptorIncrementSize;
 
 	// Command List + Allocator
 	ComPtr<ID3D12CommandQueue>			m_pd3dCommandQueue;
@@ -87,11 +97,12 @@ private:
 	ComPtr<ID3D12CommandAllocator>		m_pd3dCommandAllocator;
 
 	// Fence
-	ComPtr<ID3D12Fence> m_pd3dFence;
-	HANDLE				m_hFenceEvent;
+	ComPtr<ID3D12Fence>			m_pd3dFence;
+	HANDLE						m_hFenceEvent;
 
-	D3D12_VIEWPORT m_d3dViewport;
-	D3D12_RECT m_d3dScissorRect;
+	D3D12_VIEWPORT				m_d3dViewport;
+	UINT64						m_nFenceValues[m_nSwapChainBuffers];
+	D3D12_RECT					m_d3dScissorRect;
 
 	bool m_bEnableDebugLayer = false;
 #pragma endregion

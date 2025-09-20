@@ -56,8 +56,8 @@ protected:
 	std::vector<D3D12_INDEX_BUFFER_VIEW>	m_d3dSubSetIndexBufferViews;
 
 public:
-	virtual void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList) {}
-	virtual void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount = 1);
+	virtual void AddToRenderMap(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList) {}
+	virtual void AddToRenderMap(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount = 1);
 };
 
 class IlluminatedMesh : public Mesh
@@ -74,5 +74,5 @@ protected:
 	D3D12_VERTEX_BUFFER_VIEW	m_d3dNormalBufferView;
 
 public:
-	virtual void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount = 1) override;
+	virtual void AddToRenderMap(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount = 1) override;
 };

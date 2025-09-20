@@ -6,6 +6,10 @@ class Player : public GameObject {
 public:
 	Player();
 
+	virtual void Initialize() {}
+	virtual void Update(float fTimeElapsed) override;
+	virtual void Animate(float fTimeElapsed) override;
+
 	XMFLOAT3 GetPosition() const { return m_xmf3Position; }
 	XMFLOAT3 GetLookVector() const { return m_xmf3Look; }
 	XMFLOAT3 GetUpVector() const { return m_xmf3Up; }
@@ -31,14 +35,12 @@ public:
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	void Rotate(float x, float y, float z);
 
-	virtual void Update(float fTimeElapsed) override;
-
 	virtual void CreateShaderVariables(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 	virtual void UpdateShaderVariables(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 
+	std::shared_ptr<Camera> OnChangeCamera(UINT nNewCameraMode, DWORD nCurrentCameraMode);
 	virtual std::shared_ptr<Camera> ChangeCamera(UINT nNewCameraMode, float fTimeElapsed) { return nullptr; }
-	virtual void OnPrepareRender();
-	virtual void Render(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
+	virtual void OnPrepareRender() override;
 
 protected:
 	XMFLOAT3					m_xmf3Position;
@@ -59,5 +61,21 @@ protected:
 
 	std::shared_ptr<Camera>		m_pCamera = nullptr;
 
+};
+
+class AirplanePlayer : public Player {
+public:
+	AirplanePlayer(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, ComPtr<ID3D12RootSignature> pd3dGraphicsRootSignature);
+	virtual ~AirplanePlayer();
+
+	std::shared_ptr<GameObject> m_pMainRotorFrame = nullptr;
+	std::shared_ptr<GameObject> m_pTailRotorFrame = nullptr;
+
+private:
+	virtual void Initialize() override;
+	virtual void Animate(float fTimeElapsed) override;
+
+public:
+	virtual std::shared_ptr<Camera> ChangeCamera(UINT nNewCameraMode, float fTimeElapsed) override;
 };
 

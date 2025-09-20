@@ -39,7 +39,7 @@ public:
 private:
 	std::shared_ptr<Player>						m_pPlayer;
 	std::vector<std::shared_ptr<GameObject>>	m_pGameObjects;
-	std::vector<Light>							m_Lights;
+	std::vector<std::shared_ptr<Light>>							m_pLights;
 	XMFLOAT4									m_xmf4GlobalAmbient;
 
 	ConstantBuffer								m_LightCBuffer;

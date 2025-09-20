@@ -1,10 +1,54 @@
 #include "stdafx.h"
 #include "GameObject.h"
 
-void GameObject::Update(float fTimeElapsed) 
+GameObject::GameObject()
+{
+	m_xmf4x4Transform = Matrix4x4::Identity();
+	m_xmf4x4World = Matrix4x4::Identity();
+}
+
+void GameObject::SetMesh(std::shared_ptr<Mesh> pMesh)
+{
+	m_pMesh = pMesh;
+}
+
+void GameObject::SetShader(std::shared_ptr<Shader> pShader)
+{
+	m_pMaterials.resize(1);
+	m_pMaterials[0] = std::make_shared<Material>();
+	m_pMaterials[0]->SetShader(pShader);
+}
+
+void GameObject::SetShader(int nMaterial, std::shared_ptr<Shader> pShader)
+{
+	if (m_pMaterials[nMaterial]) {
+		m_pMaterials[nMaterial]->SetShader(pShader);
+	}
+}
+
+void GameObject::SetMaterial(int nMaterial, std::shared_ptr<Material> pMaterial)
+{
+	m_pMaterials[nMaterial] = pMaterial;
+}
+
+void GameObject::SetChild(std::shared_ptr<GameObject> pChild)
+{
+	if (pChild)
+	{
+		pChild->m_pParent = shared_from_this();
+		m_pChildren.push_back(pChild);
+	}
+}
+
+void GameObject::Update(float fTimeElapsed)
+{
+	Animate(fTimeElapsed);
+}
+
+void GameObject::Animate(float fTimeElapsed) 
 {
 	for (auto pChild : m_pChildren) {
-		pChild->Update(fTimeElapsed);
+		pChild->Animate(fTimeElapsed);
 	}
 }
 
@@ -101,7 +145,7 @@ void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 void GameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
-	m_xmOBB.Transform(m_xmOBBWorld, XMLoadFloat4x4(&m_xmf4x4World));
+	//m_xmOBB.Transform(m_xmOBBWorld, XMLoadFloat4x4(&m_xmf4x4World));
 
 	for (auto& pChild : m_pChildren) {
 		pChild->UpdateTransform(&m_xmf4x4World);
@@ -122,6 +166,20 @@ std::shared_ptr<GameObject> GameObject::FindFrame(const std::string& svFrameName
 	}
 
 	return nullptr;
+}
+
+void GameObject::AddToRenderMap()
+{
+	OnPrepareRender();
+
+	if (m_pMesh) {
+		RENDER->Add(shared_from_this());
+	}
+
+	for (auto& pChild : m_pChildren) {
+		pChild->AddToRenderMap();
+	}
+
 }
 
 /////////////////////
@@ -362,7 +420,7 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 			if (nChildren > 0) {
 				for (int i = 0; i < nChildren; ++i) {
 					std::shared_ptr<GameObject> pChild = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dRootSignature, pGameObject, inFile);
-					if (pGameObject) {
+					if (pChild) {
 						pGameObject->m_pChildren.push_back(pChild);
 					}
 				}
@@ -414,10 +472,10 @@ RotatingObject::~RotatingObject()
 {
 }
 
-void RotatingObject::Update(float fTimeElapsed)
+void RotatingObject::Animate(float fTimeElapsed)
 {
 	GameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
-	GameObject::Update(fTimeElapsed);
+	GameObject::Animate(fTimeElapsed);
 }
 
 ////////////////////
@@ -434,12 +492,12 @@ RevolvingObject::~RevolvingObject()
 {
 }
 
-void RevolvingObject::Update(float fTimeElapsed)
+void RevolvingObject::Animate(float fTimeElapsed)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed));
 	m_xmf4x4Transform = Matrix4x4::Multiply(m_xmf4x4Transform, mtxRotate);
 
-	GameObject::Update(fTimeElapsed);
+	GameObject::Animate(fTimeElapsed);
 }
 
 ///////////////////////
@@ -458,7 +516,7 @@ void HellicopterObject::Initialize()
 {
 }
 
-void HellicopterObject::Update(float fTimeElapsed)
+void HellicopterObject::Animate(float fTimeElapsed)
 {
 	if (m_pMainRotorFrame)
 	{
@@ -471,7 +529,7 @@ void HellicopterObject::Update(float fTimeElapsed)
 		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
 	}
 
-	GameObject::Update(fTimeElapsed);
+	GameObject::Animate(fTimeElapsed);
 }
 
 //////////////////
@@ -492,7 +550,7 @@ void ApacheObject::Initialize()
 	m_pTailRotorFrame = FindFrame("black_m_7");
 }
 
-void ApacheObject::Update(float fTimeElapsed)
+void ApacheObject::Animate(float fTimeElapsed)
 {
 	if (m_pMainRotorFrame)
 	{
@@ -505,7 +563,7 @@ void ApacheObject::Update(float fTimeElapsed)
 		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
 	}
 
-	GameObject::Update(fTimeElapsed);
+	GameObject::Animate(fTimeElapsed);
 }
 
 ///////////////////
@@ -590,7 +648,7 @@ void TankObject::Initialize()
 {
 }
 
-void TankObject::Update(float fTimeElapsed)
+void TankObject::Animate(float fTimeElapsed)
 {
 	if (m_pTurretFrame)
 	{
@@ -598,7 +656,7 @@ void TankObject::Update(float fTimeElapsed)
 		m_pTurretFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTurretFrame->m_xmf4x4Transform);
 	}
 
-	GameObject::Update(fTimeElapsed);
+	GameObject::Animate(fTimeElapsed);
 }
 
 ///////////////

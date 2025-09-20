@@ -36,9 +36,12 @@ struct CB_MATERIAL_DATA {
 
 class Material {
 public:
+	Material() = default;
 	Material(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 
 public:
+	void Create(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
+	
 	void SetMaterialColors(std::shared_ptr<MaterialColors> pMaterialColors) { m_pMaterialColors = pMaterialColors; }
 	void SetShader(std::shared_ptr<Shader> pShader) { m_pShader = pShader; }
 	void SetIlluminatedShader() { SetShader(m_pIlluminatedShader); }

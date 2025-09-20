@@ -1,5 +1,7 @@
 #pragma once
 
+#define ASPECT_RATIO				(float(GameFramework::g_nClientWidth) / float(GameFramework::g_nClientHeight))
+
 struct CB_CAMERA_DATA {
 	XMFLOAT4X4						m_xmf4x4View;
 	XMFLOAT4X4						m_xmf4x4Projection;
@@ -7,9 +9,9 @@ struct CB_CAMERA_DATA {
 };
 
 enum CAMERA_MODE : UINT {
-	CAMERA_MODE_FIRST_PERSON_CAMERA = 1,
-	CAMERA_MODE_SPACESHIP_CAMERA,
-	CAMERA_MODE_THIRD_PERSON_CAMERA
+	CAMERA_MODE_FIRST_PERSON = 1,
+	CAMERA_MODE_SPACESHIP,
+	CAMERA_MODE_THIRD_PERSON
 };
 
 class Player;
@@ -17,7 +19,7 @@ class Player;
 class Camera {
 public:
 	Camera();
-	Camera(const Camera& other);
+	Camera(const std::shared_ptr<Camera> pOther);
 
 	virtual void CreateShaderVariables(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 	virtual void UpdateShaderVariables(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
@@ -60,7 +62,10 @@ public:
 	void SetOffset(XMFLOAT3 xmf3Offset) { m_xmf3Offset = xmf3Offset; }
 	XMFLOAT3& GetOffset() { return m_xmf3Offset; }
 
-	XMFLOAT4X4 GetViewMatrix() const { return m_xmf4x4View; }
+	void SetTimeLag(float fTimeLag) { m_fTimeLag = fTimeLag; }
+	float GetTimeLag()  const { return m_fTimeLag; }
+
+	XMFLOAT4X4 GetViewMatrix() const { return m_xmf4x4View; } const
 	XMFLOAT4X4 GetProjectionMatrix() const { return m_xmf4x4Projection; }
 	D3D12_VIEWPORT GetViewport() const { return m_d3dViewport; }
 	D3D12_RECT GetScissorRect() const { return m_d3dScissorRect; }
@@ -106,7 +111,8 @@ protected:
 
 class SpaceShipCamera : public Camera {
 public:
-	SpaceShipCamera(const Camera& other);
+	SpaceShipCamera();
+	SpaceShipCamera(const std::shared_ptr<Camera> pOther);
 	virtual ~SpaceShipCamera() {}
 
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) override;
@@ -114,7 +120,8 @@ public:
 
 class FirstPersonCamera : public Camera {
 public:
-	FirstPersonCamera(const Camera& other);
+	FirstPersonCamera();
+	FirstPersonCamera(const std::shared_ptr<Camera> pOther);
 	virtual ~FirstPersonCamera() {}
 
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) override;
@@ -122,7 +129,8 @@ public:
 
 class ThirdPersonCamera : public Camera {
 public:
-	ThirdPersonCamera(const Camera& other);
+	ThirdPersonCamera();
+	ThirdPersonCamera(const std::shared_ptr<Camera> pOther);
 	virtual ~ThirdPersonCamera() {}
 
 	virtual void Update(const XMFLOAT3& xmf3LookAt, float fTimeElapsed) override;

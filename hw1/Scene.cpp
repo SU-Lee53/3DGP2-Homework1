@@ -9,61 +9,62 @@ Scene::Scene(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> 
 
 void Scene::BuildDefaultLightsAndMaterials()
 {
-	m_Lights.reserve(4);
+	m_pLights.reserve(4);
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
 
-	PointLight light1{};
-	light1.m_bEnable = true;
-	light1.m_fRange = 1000.0f;
-	light1.m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
-	light1.m_xmf4Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
-	light1.m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
-	light1.m_xmf3Position = XMFLOAT3(30.0f, 30.0f, 30.0f);
-	light1.m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	light1.m_fAttenuation0 = 1.0f;
-	light1.m_fAttenuation1 = 0.001f;
-	light1.m_fAttenuation2 = 0.0001f;
-	m_Lights.push_back(light1);
+	std::shared_ptr<PointLight> pLight1 = std::make_shared<PointLight>();
+	pLight1->m_bEnable = true;
+	pLight1->m_fRange = 1000.0f;
+	pLight1->m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
+	pLight1->m_xmf4Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
+	pLight1->m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+	pLight1->m_xmf3Position = XMFLOAT3(30.0f, 30.0f, 30.0f);
+	pLight1->m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	pLight1->m_fAttenuation0 = 1.0f;
+	pLight1->m_fAttenuation1 = 0.001f;
+	pLight1->m_fAttenuation2 = 0.0001f;
+	m_pLights.push_back(pLight1);
 
-	SpotLight light2{};
-	light2.m_bEnable = true;
-	light2.m_fRange = 500.0f;
-	light2.m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	light2.m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	light2.m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	light2.m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
-	light2.m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	light2.m_fAttenuation0 = 1.0f;
-	light2.m_fAttenuation1 = 0.01f;
-	light2.m_fAttenuation2 = 0.0001f;
-	light2.m_fFalloff = 8.0f;
-	light2.m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-	light2.m_fTheta = (float)cos(XMConvertToRadians(20.0f));
-	m_Lights.push_back(light2);
+	std::shared_ptr<SpotLight> pLight2 = std::make_shared<SpotLight>();
+	pLight2->m_bEnable = true;
+	pLight2->m_fRange = 500.0f;
+	pLight2->m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	pLight2->m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	pLight2->m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	pLight2->m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
+	pLight2->m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	pLight2->m_fAttenuation0 = 1.0f;
+	pLight2->m_fAttenuation1 = 0.01f;
+	pLight2->m_fAttenuation2 = 0.0001f;
+	pLight2->m_fFalloff = 8.0f;
+	pLight2->m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	pLight2->m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights.push_back(pLight2);
 
-	DirectionalLight light3{};
-	light3.m_bEnable = true;
-	light3.m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	light3.m_xmf4Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	light3.m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
-	light3.m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	std::shared_ptr<DirectionalLight> pLight3 = std::make_shared<DirectionalLight>();
+	pLight3->m_bEnable = true;
+	pLight3->m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	pLight3->m_xmf4Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	pLight3->m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
+	pLight3->m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	m_pLights.push_back(pLight3);
 
-	SpotLight light4{};
-	light4.m_bEnable = true;
-	light4.m_fRange = 600.0f;
-	light4.m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	light4.m_xmf4Diffuse = XMFLOAT4(0.3f, 0.7f, 0.0f, 1.0f);
-	light4.m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	light4.m_xmf3Position = XMFLOAT3(50.0f, 30.0f, 30.0f);
-	light4.m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 1.0f);
-	light4.m_fAttenuation0 = 1.0f;
-	light4.m_fAttenuation1 = 0.01f;
-	light4.m_fAttenuation2 = 0.0001f;
-	light4.m_fFalloff = 8.0f;
-	light4.m_fPhi = (float)cos(XMConvertToRadians(90.0f));
-	light4.m_fTheta = (float)cos(XMConvertToRadians(30.0f));
-	m_Lights.push_back(light4);
+	std::shared_ptr<SpotLight> pLight4 = std::make_shared<SpotLight>();
+	pLight4->m_bEnable = true;
+	pLight4->m_fRange = 600.0f;
+	pLight4->m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	pLight4->m_xmf4Diffuse = XMFLOAT4(0.3f, 0.7f, 0.0f, 1.0f);
+	pLight4->m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	pLight4->m_xmf3Position = XMFLOAT3(50.0f, 30.0f, 30.0f);
+	pLight4->m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 1.0f);
+	pLight4->m_fAttenuation0 = 1.0f;
+	pLight4->m_fAttenuation1 = 0.01f;
+	pLight4->m_fAttenuation2 = 0.0001f;
+	pLight4->m_fFalloff = 8.0f;
+	pLight4->m_fPhi = (float)cos(XMConvertToRadians(90.0f));
+	pLight4->m_fTheta = (float)cos(XMConvertToRadians(30.0f));
+	m_pLights.push_back(pLight4);
 }
 
 void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
@@ -72,18 +73,45 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	Material::PrepareShaders(pd3dDevice, m_pd3dRootSignature);
 	BuildDefaultLightsAndMaterials();
 
+	std::shared_ptr<GameObject> pMi24Model = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
+	std::shared_ptr<AirplanePlayer> pAirplanePlayer = std::make_shared<AirplanePlayer>(pd3dDevice, pd3dCommandList, m_pd3dRootSignature);
+	std::shared_ptr<ThirdPersonCamera> pCamera = std::make_shared<ThirdPersonCamera>();
 
-	std::shared_ptr<GameObject> pApacheModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Apache.bin");
-	std::shared_ptr<GameObject> pGunshipModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
-	std::shared_ptr<GameObject> pSuperCobraModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/SuperCobra.bin");
-	std::shared_ptr<GameObject> pMi24Model = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Mi24.bin");	
-	std::shared_ptr<GameObject> pHummerModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Hummer.bin");
-	std::shared_ptr<GameObject> pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/M26.bin");
+	pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	pCamera->SetTimeLag(0.25f);
+	pCamera->SetOffset(XMFLOAT3(0.0f, 105.0f, -140.0f));
+	pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+	pCamera->SetViewport(0, 0, GameFramework::g_nClientWidth, GameFramework::g_nClientHeight, 0.0f, 1.0f);
+	pCamera->SetScissorRect(0, 0, GameFramework::g_nClientWidth, GameFramework::g_nClientHeight);
+	pCamera->SetPlayer(pAirplanePlayer);
+	pAirplanePlayer->SetCamera(pCamera);
+
+	pAirplanePlayer->SetFriction(20.5f);
+	pAirplanePlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	pAirplanePlayer->SetMaxVelocityXZ(25.5f);
+	pAirplanePlayer->SetMaxVelocityY(40.0f);
+	pAirplanePlayer->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
+	pAirplanePlayer->SetChild(pMi24Model);
+
+	pMi24Model->Rotate(15.0f, 0.0f, 0.0f);
+	pMi24Model->SetScale(8.5f, 8.5f, 8.5f);
+
+	m_pPlayer = pAirplanePlayer;
+	m_pPlayer->Initialize();
+
+	m_pPlayer->SetFriction(20.5f);
+	m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pPlayer->SetMaxVelocityXZ(25.5f);
+	m_pPlayer->SetMaxVelocityY(40.0f);
 
 
-	__debugbreak();
+	//std::shared_ptr<GameObject> pApacheModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Apache.bin");
+	//std::shared_ptr<GameObject> pGunshipModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
+	//std::shared_ptr<GameObject> pSuperCobraModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/SuperCobra.bin");
+	//std::shared_ptr<GameObject> pHummerModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Hummer.bin");
+	//std::shared_ptr<GameObject> pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/M26.bin");
 
-
+	//__debugbreak();
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -112,23 +140,25 @@ void Scene::Render(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommand
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dCPUHandle = RENDER->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart();
 
 	// Per Scene Descriptor ¿¡ º¹»ç
-	pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, m_LightCBuffer.GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	auto pCamera = m_pPlayer->GetCamera();
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+
+	pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, pCamera->GetCBuffer().GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	d3dCPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
 
-	pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, m_pPlayer->GetCamera()->GetCBuffer().GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	d3dCPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
+	pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, m_LightCBuffer.GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	pd3dCommandList->SetGraphicsRootDescriptorTable(0, RENDER->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 
 	if (m_pPlayer) {
-		RENDER->Add(m_pPlayer);
+		m_pPlayer->AddToRenderMap();
 	}
 
 	for (auto& pObj : m_pGameObjects) {
-		RENDER->Add(pObj);
+		pObj->AddToRenderMap();
 	}
 
-	RENDER->Render(pd3dCommandList);
 }
 
 void Scene::CreateShaderVariables(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
@@ -139,10 +169,10 @@ void Scene::CreateShaderVariables(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12
 void Scene::UpdateShaderVariable(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 {
 	CB_SCENE_DATA data;
-	data.nLights = m_Lights.size();
+	data.nLights = m_pLights.size();
 
-	for (int i = 0; i < m_Lights.size(); ++i) {
-		data.LightData[i] = m_Lights[i].MakeLightData();
+	for (int i = 0; i < m_pLights.size(); ++i) {
+		data.LightData[i] = m_pLights[i]->MakeLightData();
 	}
 
 	m_LightCBuffer.UpdateData(pd3dCommandList, &data);
@@ -207,7 +237,7 @@ void Scene::CreateRootSignature(ComPtr<ID3D12Device> pd3dDevice)
 	}
 #endif
 
-	D3D12_ROOT_PARAMETER d3dRootParameters[3];
+	D3D12_ROOT_PARAMETER d3dRootParameters[4];
 	{
 		// Per Scene
 		d3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -235,7 +265,13 @@ void Scene::CreateRootSignature(ComPtr<ID3D12Device> pd3dDevice)
 		d3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 #endif // INSTANCING_USING_DESCRIPTOR_TABLE
-
+		
+		// Instance count
+		d3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+		d3dRootParameters[3].Constants.Num32BitValues = 2;
+		d3dRootParameters[3].Constants.ShaderRegister = 3;
+		d3dRootParameters[3].Constants.RegisterSpace = 0;
+		d3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	}
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT

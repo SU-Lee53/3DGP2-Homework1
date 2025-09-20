@@ -79,4 +79,11 @@ struct INSTANCE_DATA
 
 StructuredBuffer<INSTANCE_DATA> sbInstanceData : register(t0);
 
+cbuffer cbInstanceInfo : register(b3)
+{
+    int gnBaseIndex;
+    int gnInstanceCount;
+}
+
+
 #endif

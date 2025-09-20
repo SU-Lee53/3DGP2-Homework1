@@ -23,11 +23,13 @@ std::shared_ptr<Shader> Material::m_pIlluminatedShader = nullptr;
 
 Material::Material(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 {
-	HRESULT hr;
-
-	m_MaterialCBuffer.Create(pd3dDevice, pd3dCommandList, ConstantBufferSize<CB_MATERIAL_DATA>::value, true);
+	Create(pd3dDevice, pd3dCommandList);
 }
 
+void Material::Create(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
+{
+	m_MaterialCBuffer.Create(pd3dDevice, pd3dCommandList, ConstantBufferSize<CB_MATERIAL_DATA>::value, true);
+}
 void Material::UpdateShaderVariable(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 {
 	CB_MATERIAL_DATA cbData{};
