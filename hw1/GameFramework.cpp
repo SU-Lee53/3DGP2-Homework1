@@ -54,6 +54,8 @@ void GameFramework::BuildObjects()
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
 	WaitForGPUComplete();
+
+	m_pScene->ReleaseUploadBuffers();
 }
 
 void GameFramework::ProcessInput()

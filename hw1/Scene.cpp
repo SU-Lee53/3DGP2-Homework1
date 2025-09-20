@@ -116,6 +116,15 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
+void Scene::ReleaseUploadBuffers()
+{
+	m_pPlayer->ReleaseUploadBuffers();
+
+	for (auto& pObj : m_pGameObjects) {
+		pObj->ReleaseUploadBuffers();
+	}
+}
+
 bool Scene::ProcessInput(UCHAR* pKeysBuffer)
 {
 	return false;
@@ -174,6 +183,8 @@ void Scene::UpdateShaderVariable(ComPtr<ID3D12GraphicsCommandList> pd3dCommandLi
 	for (int i = 0; i < m_pLights.size(); ++i) {
 		data.LightData[i] = m_pLights[i]->MakeLightData();
 	}
+
+	data.globalAmbientLight = m_xmf4GlobalAmbient;
 
 	m_LightCBuffer.UpdateData(pd3dCommandList, &data);
 }

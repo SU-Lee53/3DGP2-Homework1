@@ -182,6 +182,15 @@ void GameObject::AddToRenderMap()
 
 }
 
+void GameObject::ReleaseUploadBuffers()
+{
+	if (m_pMesh) m_pMesh->ReleaseUploadBuffers();
+
+	for (auto& pChild : m_pChildren) {
+		pChild->ReleaseUploadBuffers();
+	}
+}
+
 /////////////////////
 // Load From Files //
 /////////////////////

@@ -5,6 +5,8 @@ CB_LIGHT_DATA PointLight::MakeLightData()
 {
 	CB_LIGHT_DATA data{};
 	{
+		data.nType = LIGHT_TYPE_POINT_LIGHT;
+		data.bEnable = TRUE;
 		data.xmf4Diffuse = m_xmf4Diffuse;
 		data.xmf4Ambient = m_xmf4Ambient;
 		data.xmf4Specular = m_xmf4Specular;
@@ -22,6 +24,8 @@ CB_LIGHT_DATA SpotLight::MakeLightData()
 {
 	CB_LIGHT_DATA data{};
 	{
+		data.nType = LIGHT_TYPE_SPOT_LIGHT;
+		data.bEnable = TRUE;
 		data.xmf4Diffuse = m_xmf4Diffuse;
 		data.xmf4Ambient = m_xmf4Ambient;
 		data.xmf4Specular = m_xmf4Specular;
@@ -43,6 +47,8 @@ CB_LIGHT_DATA DirectionalLight::MakeLightData()
 {
 	CB_LIGHT_DATA data{};
 	{
+		data.nType = LIGHT_TYPE_DIRECTIONAL_LIGHT;
+		data.bEnable = TRUE;
 		data.xmf4Diffuse = m_xmf4Diffuse;
 		data.xmf4Ambient = m_xmf4Ambient;
 		data.xmf4Specular = m_xmf4Specular;

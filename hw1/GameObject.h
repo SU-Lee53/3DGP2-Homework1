@@ -68,6 +68,9 @@ public:
 	virtual void AddToRenderMap();
 
 public:
+	void ReleaseUploadBuffers();
+
+public:
 	std::string m_strFrameName;
 
 	std::shared_ptr<Mesh> m_pMesh;

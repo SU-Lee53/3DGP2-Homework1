@@ -17,6 +17,8 @@ public:
 public:
 	void BuildDefaultLightsAndMaterials();
 	void BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
+	void ReleaseUploadBuffers();
+
 	bool ProcessInput(UCHAR* pKeysBuffer);
 	void Update(float fTimeElapsed);
 	void Render(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
@@ -39,7 +41,7 @@ public:
 private:
 	std::shared_ptr<Player>						m_pPlayer;
 	std::vector<std::shared_ptr<GameObject>>	m_pGameObjects;
-	std::vector<std::shared_ptr<Light>>							m_pLights;
+	std::vector<std::shared_ptr<Light>>			m_pLights;
 	XMFLOAT4									m_xmf4GlobalAmbient;
 
 	ConstantBuffer								m_LightCBuffer;

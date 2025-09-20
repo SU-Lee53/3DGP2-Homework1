@@ -93,14 +93,14 @@ IlluminatedMesh::IlluminatedMesh(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12G
 	m_pd3dNormalBuffer = ::CreateBufferResource(
 		pd3dDevice,
 		pd3dCommandList,
-		(void*)meshLoadInfo.xmf3Positions.data(),
+		(void*)meshLoadInfo.xmf3Normals.data(),
 		sizeof(XMFLOAT3) * m_nVertices,
 		D3D12_HEAP_TYPE_DEFAULT,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
 		m_pd3dNormalUploadBuffer.GetAddressOf()
 	);
 
-	m_d3dNormalBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_d3dNormalBufferView.BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
 	m_d3dNormalBufferView.StrideInBytes = sizeof(XMFLOAT3);
 	m_d3dNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 }
