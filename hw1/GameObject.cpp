@@ -467,6 +467,28 @@ std::shared_ptr<GameObject> GameObject::LoadGeometryFromFile(ComPtr<ID3D12Device
 	return pGameObject;
 }
 
+std::shared_ptr<GameObject> GameObject::CopyObject(const GameObject& srcObject, std::shared_ptr<GameObject> pParent)
+{
+	std::shared_ptr<GameObject> pClone = std::make_shared<GameObject>();
+	pClone->m_strFrameName = srcObject.m_strFrameName;
+	pClone->m_pMesh = srcObject.m_pMesh;
+	pClone->m_pMaterials = srcObject.m_pMaterials;
+	pClone->m_xmf4x4Transform = srcObject.m_xmf4x4Transform;
+	pClone->m_xmf4x4World = srcObject.m_xmf4x4World;
+	pClone->m_xmOBB = srcObject.m_xmOBB;
+	pClone->m_xmOBBWorld = srcObject.m_xmOBBWorld;
+
+	pClone->m_pParent = pParent;
+
+	pClone->m_pChildren.reserve(srcObject.m_pChildren.size());
+	for (auto& pChild : srcObject.m_pChildren) {
+		std::shared_ptr<GameObject> pChildClone = CopyObject(*pChild, pClone);
+		pClone->m_pChildren.push_back(pChildClone);
+	}
+
+	return pClone;
+}
+
 ////////////////////
 // RotatingObject //
 ////////////////////

@@ -4,7 +4,7 @@ class Mesh;
 class Material;
 class StructuredBuffer;
 
-#define MAX_INSTANCING_COUNT 2000
+#define MAX_INSTANCING_COUNT 300000
 
 struct INSTANCE_DATA {
 	XMFLOAT4X4 xmf4x4GameObject;

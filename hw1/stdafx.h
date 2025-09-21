@@ -64,7 +64,7 @@ using namespace DirectX;
 #include "StructuredBuffer.h"
 #include "GameFramework.h"
 
-#define INSTANCING_USING_DESCRIPTOR_TABLE
+//#define INSTANCING_USING_DESCRIPTOR_TABLE
 
 
 

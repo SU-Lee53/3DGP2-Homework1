@@ -57,7 +57,7 @@ void Mesh::ReleaseUploadBuffers()
 		m_pd3dPositionUploadBuffer.Reset();
 	}
 
-	if (m_nSubMeshes && m_pd3dSubSetIndexBuffers[0]) {
+	if (m_nSubMeshes && m_pd3dSubSetIndexUploadBuffers.size() != 0) {
 		for (int i = 0; i < m_nSubMeshes; ++i) {
 			if (m_pd3dSubSetIndexUploadBuffers[i]) {
 				m_pd3dSubSetIndexUploadBuffers[i].Reset();
@@ -68,7 +68,7 @@ void Mesh::ReleaseUploadBuffers()
 	}
 }
 
-void Mesh::AddToRenderMap(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount)
+void Mesh::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount)
 {
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
@@ -118,7 +118,7 @@ void IlluminatedMesh::ReleaseUploadBuffers()
 	}
 }
 
-void IlluminatedMesh::AddToRenderMap(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount)
+void IlluminatedMesh::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, int nSubSet, int nInstanceCount)
 {
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dPositionBufferView, m_d3dNormalBufferView };

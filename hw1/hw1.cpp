@@ -50,7 +50,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 #ifdef _DEBUG
     g_pGameFramework = new GameFramework(hInst, hWnd, 800, 600, true);
-#elif
+#else
     g_pGameFramework = new GameFramework(hInst, hWnd, 800, 600, false);
 #endif
 

@@ -73,37 +73,70 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	Material::PrepareShaders(pd3dDevice, m_pd3dRootSignature);
 	BuildDefaultLightsAndMaterials();
 
-	std::shared_ptr<GameObject> pMi24Model = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
-	std::shared_ptr<AirplanePlayer> pAirplanePlayer = std::make_shared<AirplanePlayer>(pd3dDevice, pd3dCommandList, m_pd3dRootSignature);
-	std::shared_ptr<ThirdPersonCamera> pCamera = std::make_shared<ThirdPersonCamera>();
+	// Player
+	{
+		std::shared_ptr<GameObject> pMi24Model = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
+		std::shared_ptr<AirplanePlayer> pAirplanePlayer = std::make_shared<AirplanePlayer>(pd3dDevice, pd3dCommandList, m_pd3dRootSignature);
+		std::shared_ptr<ThirdPersonCamera> pCamera = std::make_shared<ThirdPersonCamera>();
 
-	pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	pCamera->SetTimeLag(0.25f);
-	pCamera->SetOffset(XMFLOAT3(0.0f, 105.0f, -140.0f));
-	pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-	pCamera->SetViewport(0, 0, GameFramework::g_nClientWidth, GameFramework::g_nClientHeight, 0.0f, 1.0f);
-	pCamera->SetScissorRect(0, 0, GameFramework::g_nClientWidth, GameFramework::g_nClientHeight);
-	pCamera->SetPlayer(pAirplanePlayer);
-	pAirplanePlayer->SetCamera(pCamera);
+		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+		pCamera->SetTimeLag(0.25f);
+		pCamera->SetOffset(XMFLOAT3(0.0f, 105.0f, -140.0f));
+		pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		pCamera->SetViewport(0, 0, GameFramework::g_nClientWidth, GameFramework::g_nClientHeight, 0.0f, 1.0f);
+		pCamera->SetScissorRect(0, 0, GameFramework::g_nClientWidth, GameFramework::g_nClientHeight);
+		pCamera->SetPlayer(pAirplanePlayer);
+		pAirplanePlayer->SetCamera(pCamera);
 
-	pAirplanePlayer->SetFriction(20.5f);
-	pAirplanePlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	pAirplanePlayer->SetMaxVelocityXZ(25.5f);
-	pAirplanePlayer->SetMaxVelocityY(40.0f);
-	pAirplanePlayer->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
-	pAirplanePlayer->SetChild(pMi24Model);
+		pAirplanePlayer->SetFriction(20.5f);
+		pAirplanePlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		pAirplanePlayer->SetMaxVelocityXZ(25.5f);
+		pAirplanePlayer->SetMaxVelocityY(40.0f);
+		pAirplanePlayer->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
+		pAirplanePlayer->SetChild(pMi24Model);
 
-	pMi24Model->Rotate(15.0f, 0.0f, 0.0f);
-	pMi24Model->SetScale(8.5f, 8.5f, 8.5f);
+		pMi24Model->Rotate(15.0f, 0.0f, 0.0f);
+		pMi24Model->SetScale(8.5f, 8.5f, 8.5f);
 
-	m_pPlayer = pAirplanePlayer;
-	m_pPlayer->Initialize();
+		m_pPlayer = pAirplanePlayer;
+		m_pPlayer->Initialize();
 
-	m_pPlayer->SetFriction(20.5f);
-	m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pPlayer->SetMaxVelocityXZ(25.5f);
-	m_pPlayer->SetMaxVelocityY(40.0f);
+		m_pPlayer->SetFriction(20.5f);
+		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pPlayer->SetMaxVelocityXZ(25.5f);
+		m_pPlayer->SetMaxVelocityY(40.0f);
+	}
 
+	int xObjects = 8;
+	int yObjects = 1;
+	int zObjects = 8;
+	int i = 0;
+
+	m_nInstance = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
+	m_pGameObjects.reserve(m_nInstance);
+
+	float fxPitch = 200.f;
+	float fyPitch = 100.f;
+	float fzPitch = 200.f;
+	XMFLOAT3 xmf3Pivot = XMFLOAT3(260.0f, 0.0f, 150.0f);
+
+	std::shared_ptr<GameObject> pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/M26.bin");
+	for (int x = -xObjects; x <= xObjects; ++x) {
+		for (int y = -yObjects; y <= yObjects; ++y) {
+			for (int z = 0; z <= 2 * zObjects; ++z) {
+				std::shared_ptr<M26Object> pTankObject = std::make_shared<M26Object>();
+				std::shared_ptr<GameObject> pAbramsModelCopy = GameObject::CopyObject(*pAbramsModel);
+				pTankObject->SetChild(pAbramsModelCopy);
+				pTankObject->Initialize();
+
+				XMFLOAT3 xmf3Position = Vector3::Add(xmf3Pivot, XMFLOAT3(fxPitch * x, fyPitch * y, fzPitch * z));
+				pTankObject->SetPosition(xmf3Position);
+				pTankObject->SetScale(18.0f, 18.0f, 18.0f);
+				pTankObject->Rotate(0.0f, -90.0f, 0.0f);
+				m_pGameObjects.push_back(pTankObject);
+			}
+		}
+	}
 
 	//std::shared_ptr<GameObject> pApacheModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Apache.bin");
 	//std::shared_ptr<GameObject> pGunshipModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
@@ -129,6 +162,7 @@ bool Scene::ProcessInput(UCHAR* pKeysBuffer)
 {
 	return false;
 }
+
 void Scene::Update(float fTimeElapsed)
 {
 	if (m_pPlayer) {
@@ -137,6 +171,13 @@ void Scene::Update(float fTimeElapsed)
 
 	for (auto& pObj : m_pGameObjects) {
 		pObj->Update(fTimeElapsed);
+	}
+
+	if (m_pLights.size() != 0)
+	{
+		std::shared_ptr<SpotLight> pSpotLight = static_pointer_cast<SpotLight>(m_pLights[1]);
+		pSpotLight->m_xmf3Position = m_pPlayer->GetPosition();
+		pSpotLight->m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
 }
 
@@ -161,10 +202,12 @@ void Scene::Render(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommand
 	pd3dCommandList->SetGraphicsRootDescriptorTable(0, RENDER->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 
 	if (m_pPlayer) {
+		m_pPlayer->UpdateTransform(nullptr);
 		m_pPlayer->AddToRenderMap();
 	}
 
 	for (auto& pObj : m_pGameObjects) {
+		pObj->UpdateTransform(nullptr);
 		pObj->AddToRenderMap();
 	}
 

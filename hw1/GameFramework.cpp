@@ -70,12 +70,12 @@ void GameFramework::ProcessInput()
 	if (!bProcessedByScene)
 	{
 		DWORD dwDirection = 0;
-		if (pKeysBuffer[VK_UP] & 0xF0)		dwDirection |= MOVE_DIR_FORWARD;
-		if (pKeysBuffer[VK_DOWN] & 0xF0)	dwDirection |= MOVE_DIR_BACKWARD;
-		if (pKeysBuffer[VK_LEFT] & 0xF0)	dwDirection |= MOVE_DIR_LEFT;
-		if (pKeysBuffer[VK_RIGHT] & 0xF0)	dwDirection |= MOVE_DIR_RIGHT;
-		if (pKeysBuffer[VK_PRIOR] & 0xF0)	dwDirection |= MOVE_DIR_UP;
-		if (pKeysBuffer[VK_NEXT] & 0xF0)	dwDirection |= MOVE_DIR_DOWN;
+		if (pKeysBuffer['W'] & 0xF0)	dwDirection |= MOVE_DIR_FORWARD;
+		if (pKeysBuffer['S'] & 0xF0)	dwDirection |= MOVE_DIR_BACKWARD;
+		if (pKeysBuffer['A'] & 0xF0)	dwDirection |= MOVE_DIR_LEFT;
+		if (pKeysBuffer['D'] & 0xF0)	dwDirection |= MOVE_DIR_RIGHT;
+		if (pKeysBuffer['E'] & 0xF0)	dwDirection |= MOVE_DIR_UP;
+		if (pKeysBuffer['Q'] & 0xF0)	dwDirection |= MOVE_DIR_DOWN;
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
@@ -130,6 +130,9 @@ void GameFramework::Render()
 
 	TSTRING tstrFrameRate;
 	m_GameTimer.GetFrameRate(L"3DGP-Homework1", tstrFrameRate);
+
+	tstrFrameRate = std::format(L"{} (Instance Count : {})", tstrFrameRate, m_pScene->m_nInstance);
+
 	::SetWindowText(m_hWnd, tstrFrameRate.data());
 }
 

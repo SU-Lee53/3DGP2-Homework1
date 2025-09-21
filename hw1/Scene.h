@@ -51,5 +51,7 @@ private:
 
 public:
 	const static UINT g_uiDescriptorCountPerScene = 2;	// Camera + Lights
+	int m_nInstance = 0;
+
 };
 

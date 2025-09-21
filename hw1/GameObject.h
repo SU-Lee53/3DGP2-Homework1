@@ -19,7 +19,6 @@ struct CB_OBJECT_DATA {
 class GameObject : public std::enable_shared_from_this<GameObject> {
 public:
 	GameObject();
-
 public:
 	void SetMesh(std::shared_ptr<Mesh> pMesh);
 	void SetShader(std::shared_ptr<Shader> pShader);
@@ -93,6 +92,8 @@ public:
 
 	static std::shared_ptr<GameObject> LoadFrameHierarchyFromFile(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, ComPtr<ID3D12RootSignature> pd3dRootSignature, std::shared_ptr<GameObject> pParent, std::ifstream& inFile);
 	static std::shared_ptr<GameObject> LoadGeometryFromFile(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, ComPtr<ID3D12RootSignature> pd3dRootSignature, const std::string& strFileName);
+
+	static std::shared_ptr<GameObject> CopyObject(const GameObject& srcObject, std::shared_ptr<GameObject> pParent = nullptr);
 
 };
 

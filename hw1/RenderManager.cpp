@@ -15,9 +15,7 @@ RenderManager::RenderManager(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12Graph
 	m_InstanceDataSBuffer.Create(pd3dDevice, pd3dCommandList, MAX_INSTANCING_COUNT, sizeof(INSTANCE_DATA), false);
 
 #endif
-
-
-
+	 
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc{};
 	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	heapDesc.NumDescriptors = MAX_INSTANCING_COUNT;
@@ -50,7 +48,7 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 {
 	// Shader 에 넘길 SHADER_VISIBLE 한 m_pd3dDescriptorHeap은 아래처럼 구성
 	// SRV 는 인스턴싱용 StructuredBuffer
-	// CBV 는 SubSet 별 Material 정보 (Mesh 마다 갯수가 다름) -> SubSet 순서대로 기록되도록
+	// CBV 는 SubSet 별 Material 정보 (Mesh 마다 갯수 가 다름) -> SubSet 순서대로 기록되도록
 	//  
 	//                     +---------> m_pd3dDescriptorHeap->GetCPUDescriptorHandleForHeapStart()
 	//                     |  
@@ -107,7 +105,7 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 			pd3dCommandList->SetGraphicsRootDescriptorTable(1, d3dGPUHandle);
 			d3dGPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
 
-			instanceKey.pMesh->AddToRenderMap(pd3dCommandList, i, instanceData.size());
+			instanceKey.pMesh->Render(pd3dCommandList, i, instanceData.size());
 		}
 
 		uiSBufferOffset += instanceData.size();
