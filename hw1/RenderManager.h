@@ -29,8 +29,6 @@ struct std::hash<INSTANCE_KEY> {
 	}
 };
 
-//#define DECOMPOSE_GAMEOBJECT_FOR_INSTANCING
-
 class RenderManager {
 public:
 	RenderManager(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
@@ -45,10 +43,8 @@ public:
 private:
 	std::unordered_map<INSTANCE_KEY, std::vector<INSTANCE_DATA>> m_InstanceMap;
 
-	std::unordered_map<std::shared_ptr<GameObject>, std::vector<INSTANCE_DATA>> m_InstanceMap2;
-
 	ComPtr<ID3D12Device>			m_pd3dDevice = nullptr;	// GameFramewok::m_pd3dDevice ÀÇ ÂüÁ¶
 	ComPtr<ID3D12DescriptorHeap>	m_pd3dDescriptorHeap = nullptr;
-	StructuredBuffer				m_InstanceDataSBuffer8;
+	StructuredBuffer				m_InstanceDataSBuffer;
 
 };

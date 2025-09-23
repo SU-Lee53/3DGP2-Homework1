@@ -53,5 +53,13 @@ public:
 	const static UINT g_uiDescriptorCountPerScene = 2;	// Camera + Lights
 	int m_nInstance = 0;
 
+private:
+	// Model Cache
+	std::shared_ptr<GameObject> pApacheModel = nullptr;
+	std::shared_ptr<GameObject> pGunshipModel = nullptr;
+	std::shared_ptr<GameObject> pSuperCobraModel = nullptr;
+	std::shared_ptr<GameObject> pHummerModel = nullptr;
+	std::shared_ptr<GameObject> pAbramsModel = nullptr;
+	std::shared_ptr<GameObject> pMi24Model = nullptr;
 };
 

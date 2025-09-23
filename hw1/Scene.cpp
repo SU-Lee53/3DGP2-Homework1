@@ -75,7 +75,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 
 	// Player
 	{
-		std::shared_ptr<GameObject> pMi24Model = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
+		pMi24Model = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
 		std::shared_ptr<AirplanePlayer> pAirplanePlayer = std::make_shared<AirplanePlayer>(pd3dDevice, pd3dCommandList, m_pd3dRootSignature);
 		std::shared_ptr<ThirdPersonCamera> pCamera = std::make_shared<ThirdPersonCamera>();
 
@@ -103,13 +103,13 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 
 		m_pPlayer->SetFriction(20.5f);
 		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		m_pPlayer->SetMaxVelocityXZ(25.5f);
-		m_pPlayer->SetMaxVelocityY(40.0f);
+		m_pPlayer->SetMaxVelocityXZ(125.5f);
+		m_pPlayer->SetMaxVelocityY(140.0f);
 	}
 
-	int xObjects = 3;
+	int xObjects = 0;
 	int yObjects = 0;
-	int zObjects = 3;
+	int zObjects = 1;
 	int i = 0;
 
 	m_nInstance = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
@@ -120,7 +120,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	float fzPitch = 200.f;
 	XMFLOAT3 xmf3Pivot = XMFLOAT3(260.0f, 0.0f, 150.0f);
 
-	std::shared_ptr<GameObject> pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/M26.bin");
+	pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/M26.bin");
 	for (int x = -xObjects; x <= xObjects; ++x) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			for (int z = 0; z <= 2 * zObjects; ++z) {
@@ -138,11 +138,11 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 		}
 	}
 
-	//std::shared_ptr<GameObject> pApacheModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Apache.bin");
-	//std::shared_ptr<GameObject> pGunshipModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
-	//std::shared_ptr<GameObject> pSuperCobraModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/SuperCobra.bin");
-	//std::shared_ptr<GameObject> pHummerModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Hummer.bin");
-	//std::shared_ptr<GameObject> pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/M26.bin");
+	//	pApacheModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Apache.bin");
+	//	pGunshipModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
+	//	pSuperCobraModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/SuperCobra.bin");
+	//	pHummerModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Hummer.bin");
+	//	pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/M26.bin");
 
 	//__debugbreak();
 

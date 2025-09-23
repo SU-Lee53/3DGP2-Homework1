@@ -32,7 +32,6 @@ void RenderManager::Add(std::shared_ptr<GameObject> pGameObject)
 		return;
 	}
 
-#ifdef DECOMPOSE_GAMEOBJECT_FOR_INSTANCING
 	INSTANCE_KEY key{};
 	key.pMesh = pGameObject->GetMesh();
 	key.pMaterials = pGameObject->GetMaterials();
@@ -43,9 +42,6 @@ void RenderManager::Add(std::shared_ptr<GameObject> pGameObject)
 
 	INSTANCE_DATA data{ xmf4x4InstanceData };
 	m_InstanceMap[key].push_back(data);
-#else
-	m_InstanceMap2[pGameObject].emplace_back(pGameObject->m_xmf4x4World);
-#endif
 }
 
 void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
@@ -87,68 +83,37 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dGPUHandle = m_pd3dDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	d3dGPUHandle.ptr += (uiDescriptorOffset * GameFramework::g_uiDescriptorHandleIncrementSize);
 
-	
-#ifdef DECOMPOSE_GAMEOBJECT_FOR_INSTANCING
-	// Per Object 정보 Descriptor에 복사
+	// unordered_map 을 vector 로 평탄화
+	std::vector<std::pair<INSTANCE_KEY, size_t>> instances;
+	instances.reserve(m_InstanceMap.bucket_count());
+
 	for (auto&& [instanceKey, instanceData] : m_InstanceMap) {
 		m_InstanceDataSBuffer.UpdateData(instanceData, uiSBufferOffset);
+		uiSBufferOffset += instanceData.size();
+		instances.emplace_back(instanceKey, instanceData.size());
+	}
 
+	// Instance 행렬 정보를 한번에 GPU에 바인딩
 #ifdef INSTANCING_USING_DESCRIPTOR_TABLE
-		m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, m_InstanceDataSBuffer.GetCPUDescriptorHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		d3dCPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
-		uiDescriptorOffset++;
+	m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, m_InstanceDataSBuffer.GetCPUDescriptorHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	d3dCPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
+	uiDescriptorOffset++;
 
-		pd3dCommandList->SetGraphicsRootDescriptorTable(2, d3dGPUHandle);
-		d3dGPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
-
-#else
-		m_InstanceDataSBuffer.SetBufferToPipeline(pd3dCommandList, 0, 0, 2);
-
-#endif
-		int nBase = uiSBufferOffset;
-		int nInstanceCount = instanceData.size();
-
-		pd3dCommandList->SetGraphicsRoot32BitConstant(3, nBase, 0);
-		pd3dCommandList->SetGraphicsRoot32BitConstant(3, nInstanceCount, 1);
-
-		for (int i = 0; i < instanceKey.pMaterials.size(); ++i) {
-			instanceKey.pMaterials[i]->UpdateShaderVariable(pd3dCommandList);
-			m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, instanceKey.pMaterials[i]->GetCBuffer().GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			d3dCPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
-			uiDescriptorOffset++;
-		}
-
-		for (int i = 0; i < instanceKey.pMaterials.size(); ++i) {
-			instanceKey.pMaterials[i]->OnPrepareRender(pd3dCommandList);
-
-			pd3dCommandList->SetGraphicsRootDescriptorTable(1, d3dGPUHandle);
-			d3dGPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
-
-			instanceKey.pMesh->Render(pd3dCommandList, i, instanceData.size());
-		}
-
-		uiSBufferOffset += instanceData.size();
-	}
-#else
-	std::vector<std::pair<std::shared_ptr<GameObject>, UINT>> instances;
-	std::vector<XMFLOAT4X4> xmf4x4InstanceData;
-	instances.reserve(m_InstanceMap2.bucket_count());
-
-	for (auto&& [pObj, instanceData] : m_InstanceMap2) {
-		instances.emplace_back(pObj, instanceData.size());
-		m_InstanceDataSBuffer.UpdateData(instanceData, uiSBufferOffset);
-		uiSBufferOffset += instanceData.size();
-	}
-	
-	m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, m_InstanceDataSBuffer.GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	pd3dCommandList->SetGraphicsRootDescriptorTable(2, d3dGPUHandle);
+	d3dGPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
 
-	int nBase = 0;
-	for (auto&& [pObj, nInstance] : instances) {
-		nBase += nInstance;
-		int nInstanceCount = nInstance;
+#else
+	m_InstanceDataSBuffer.SetBufferToPipeline(pd3dCommandList, 0, 0, 2);
 
-		pd3dCommandList->SetGraphicsRoot32BitConstant(3, nBase, 0);
+#endif
+
+	int nInstanceBase = 0;
+	int nInstanceCount = 0;
+	// Per Object 정보 Descriptor에 복사
+	for (auto&& [instanceKey, nInstance] : instances) {
+		nInstanceCount = nInstance;
+
+		pd3dCommandList->SetGraphicsRoot32BitConstant(3, nInstanceBase, 0);
 		pd3dCommandList->SetGraphicsRoot32BitConstant(3, nInstanceCount, 1);
 
 		for (int i = 0; i < instanceKey.pMaterials.size(); ++i) {
@@ -164,13 +129,11 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 			pd3dCommandList->SetGraphicsRootDescriptorTable(1, d3dGPUHandle);
 			d3dGPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
 
-			instanceKey.pMesh->Render(pd3dCommandList, i, instanceData.size());
+			instanceKey.pMesh->Render(pd3dCommandList, i, nInstance);
 		}
+
+		nInstanceBase += nInstance;
 	}
-
-
-#endif
-
 }
 
 void RenderManager::SetDescriptorHeapToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList) const
