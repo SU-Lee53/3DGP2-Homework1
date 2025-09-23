@@ -49,6 +49,6 @@ private:
 
 	ComPtr<ID3D12Device>			m_pd3dDevice = nullptr;	// GameFramewok::m_pd3dDevice ÀÇ ÂüÁ¶
 	ComPtr<ID3D12DescriptorHeap>	m_pd3dDescriptorHeap = nullptr;
-	StructuredBuffer				m_InstanceDataSBuffer;
+	StructuredBuffer				m_InstanceDataSBuffer8;
 
 };
