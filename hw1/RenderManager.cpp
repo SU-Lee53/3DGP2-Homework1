@@ -32,6 +32,7 @@ void RenderManager::Add(std::shared_ptr<GameObject> pGameObject)
 		return;
 	}
 
+#ifdef DECOMPOSE_GAMEOBJECT_FOR_INSTANCING
 	INSTANCE_KEY key{};
 	key.pMesh = pGameObject->GetMesh();
 	key.pMaterials = pGameObject->GetMaterials();
@@ -42,6 +43,9 @@ void RenderManager::Add(std::shared_ptr<GameObject> pGameObject)
 
 	INSTANCE_DATA data{ xmf4x4InstanceData };
 	m_InstanceMap[key].push_back(data);
+#else
+	m_InstanceMap2[pGameObject].emplace_back(pGameObject->m_xmf4x4World);
+#endif
 }
 
 void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
@@ -60,6 +64,19 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 	//                          |
 	//                          +-----------> 여기는 Scene::Render() 에서 복사함
 	//
+	// 
+	//  Option 2
+	//  
+	//                     +---------> m_pd3dDescriptorHeap->GetCPUDescriptorHandleForHeapStart()
+	//                     |  
+	//                    +-----+-----+------+-----++-----+-----++-----++-----+-----++-----++-----++-----++-----+----- 
+	//  Descriptor 구성   | CBV | CBV | SRV  | CBV || CBV | ... || CBV || CBV | ... || CBV || CBV || CBV || CBV | ...
+	//                    +-----+-----+------+-----++-----+-----++-----++-----+-----++-----++-----++-----++-----+-----
+	//    Resource 단위   |   Scene   | Inst |      Mesh 1       |      Mesh 2       |          Mesh 3          | ...
+	//                    +-----------+------+-------------------+-------------------+--------------------------+-----
+	//                          |
+	//                          +-----------> 여기는 Scene::Render() 에서 복사함
+	//
 
 	UINT uiSBufferOffset = 0;
 	UINT uiDescriptorOffset = Scene::g_uiDescriptorCountPerScene;	// Per Scene 정보 2개 넣고 시작
@@ -70,6 +87,8 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dGPUHandle = m_pd3dDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	d3dGPUHandle.ptr += (uiDescriptorOffset * GameFramework::g_uiDescriptorHandleIncrementSize);
 
+	
+#ifdef DECOMPOSE_GAMEOBJECT_FOR_INSTANCING
 	// Per Object 정보 Descriptor에 복사
 	for (auto&& [instanceKey, instanceData] : m_InstanceMap) {
 		m_InstanceDataSBuffer.UpdateData(instanceData, uiSBufferOffset);
@@ -110,6 +129,48 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 
 		uiSBufferOffset += instanceData.size();
 	}
+#else
+	std::vector<std::pair<std::shared_ptr<GameObject>, UINT>> instances;
+	std::vector<XMFLOAT4X4> xmf4x4InstanceData;
+	instances.reserve(m_InstanceMap2.bucket_count());
+
+	for (auto&& [pObj, instanceData] : m_InstanceMap2) {
+		instances.emplace_back(pObj, instanceData.size());
+		m_InstanceDataSBuffer.UpdateData(instanceData, uiSBufferOffset);
+		uiSBufferOffset += instanceData.size();
+	}
+	
+	m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, m_InstanceDataSBuffer.GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(2, d3dGPUHandle);
+
+	int nBase = 0;
+	for (auto&& [pObj, nInstance] : instances) {
+		nBase += nInstance;
+		int nInstanceCount = nInstance;
+
+		pd3dCommandList->SetGraphicsRoot32BitConstant(3, nBase, 0);
+		pd3dCommandList->SetGraphicsRoot32BitConstant(3, nInstanceCount, 1);
+
+		for (int i = 0; i < instanceKey.pMaterials.size(); ++i) {
+			instanceKey.pMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+			m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, instanceKey.pMaterials[i]->GetCBuffer().GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			d3dCPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
+			uiDescriptorOffset++;
+		}
+
+		for (int i = 0; i < instanceKey.pMaterials.size(); ++i) {
+			instanceKey.pMaterials[i]->OnPrepareRender(pd3dCommandList);
+
+			pd3dCommandList->SetGraphicsRootDescriptorTable(1, d3dGPUHandle);
+			d3dGPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
+
+			instanceKey.pMesh->Render(pd3dCommandList, i, instanceData.size());
+		}
+	}
+
+
+#endif
+
 }
 
 void RenderManager::SetDescriptorHeapToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList) const

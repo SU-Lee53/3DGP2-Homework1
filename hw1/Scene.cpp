@@ -107,9 +107,9 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 		m_pPlayer->SetMaxVelocityY(40.0f);
 	}
 
-	int xObjects = 8;
-	int yObjects = 1;
-	int zObjects = 8;
+	int xObjects = 3;
+	int yObjects = 0;
+	int zObjects = 3;
 	int i = 0;
 
 	m_nInstance = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
