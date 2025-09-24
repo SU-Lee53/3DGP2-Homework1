@@ -29,6 +29,8 @@ struct std::hash<INSTANCE_KEY> {
 	}
 };
 
+//#define INSTANCES_IN_HASHMAP
+
 class RenderManager {
 public:
 	RenderManager(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
@@ -37,11 +39,17 @@ public:
 	void Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 	void Clear();
 
+	size_t GetMeshCount();
 	ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return m_pd3dDescriptorHeap; }
 	void SetDescriptorHeapToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList) const;
 
 private:
 	std::unordered_map<INSTANCE_KEY, std::vector<INSTANCE_DATA>> m_InstanceMap;
+
+	std::unordered_map<std::string, size_t> m_InstanceIndexMap;
+	std::vector<std::pair<INSTANCE_KEY, std::vector<INSTANCE_DATA>>> m_InstanceDatas;
+	size_t m_nInstanceIndex = 0;
+	
 
 	ComPtr<ID3D12Device>			m_pd3dDevice = nullptr;	// GameFramewok::m_pd3dDevice ÀÇ ÂüÁ¶
 	ComPtr<ID3D12DescriptorHeap>	m_pd3dDescriptorHeap = nullptr;

@@ -88,11 +88,6 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 		pCamera->SetPlayer(pAirplanePlayer);
 		pAirplanePlayer->SetCamera(pCamera);
 
-		pAirplanePlayer->SetFriction(20.5f);
-		pAirplanePlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		pAirplanePlayer->SetMaxVelocityXZ(25.5f);
-		pAirplanePlayer->SetMaxVelocityY(40.0f);
-		pAirplanePlayer->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
 		pAirplanePlayer->SetChild(pMi24Model);
 
 		pMi24Model->Rotate(15.0f, 0.0f, 0.0f);
@@ -107,8 +102,8 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 		m_pPlayer->SetMaxVelocityY(140.0f);
 	}
 
-	int xObjects = 0;
-	int yObjects = 0;
+	int xObjects = 1;
+	int yObjects = 1;
 	int zObjects = 1;
 	int i = 0;
 
@@ -119,19 +114,25 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	float fyPitch = 100.f;
 	float fzPitch = 200.f;
 	XMFLOAT3 xmf3Pivot = XMFLOAT3(260.0f, 0.0f, 150.0f);
+	//pApacheObject->SetPosition(-75.0f, 0.0f, 80.0f);
+	//pApacheObject->SetScale(1.5f, 1.5f, 1.5f);
+	//pApacheObject->Rotate(0.0f, -90.0f, 0.0f);
 
-	pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/M26.bin");
+	pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Apache.bin");
 	for (int x = -xObjects; x <= xObjects; ++x) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			for (int z = 0; z <= 2 * zObjects; ++z) {
-				std::shared_ptr<M26Object> pTankObject = std::make_shared<M26Object>();
+				std::shared_ptr<ApacheObject> pTankObject = std::make_shared<ApacheObject>();
 				std::shared_ptr<GameObject> pAbramsModelCopy = GameObject::CopyObject(*pAbramsModel);
 				pTankObject->SetChild(pAbramsModelCopy);
 				pTankObject->Initialize();
 
 				XMFLOAT3 xmf3Position = Vector3::Add(xmf3Pivot, XMFLOAT3(fxPitch * x, fyPitch * y, fzPitch * z));
-				pTankObject->SetPosition(xmf3Position);
-				pTankObject->SetScale(18.0f, 18.0f, 18.0f);
+				//pTankObject->SetPosition(xmf3Position);
+				//pTankObject->SetScale(18.0f, 18.0f, 18.0f);
+				//pTankObject->Rotate(0.0f, -90.0f, 0.0f);
+				pTankObject->SetPosition(-75.0f, 0.0f, 80.0f);
+				pTankObject->SetScale(1.5f, 1.5f, 1.5f);
 				pTankObject->Rotate(0.0f, -90.0f, 0.0f);
 				m_pGameObjects.push_back(pTankObject);
 			}

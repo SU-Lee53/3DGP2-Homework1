@@ -131,7 +131,7 @@ void GameFramework::Render()
 	TSTRING tstrFrameRate;
 	m_GameTimer.GetFrameRate(L"3DGP-Homework1", tstrFrameRate);
 
-	tstrFrameRate = std::format(L"{} (Instance Count : {})", tstrFrameRate, m_pScene->m_nInstance);
+	tstrFrameRate = std::format(L"{} Instance Count : {}, Mesh Count : {}", tstrFrameRate, m_pScene->m_nInstance, RENDER->GetMeshCount());
 
 	::SetWindowText(m_hWnd, tstrFrameRate.data());
 }

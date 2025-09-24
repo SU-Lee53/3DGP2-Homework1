@@ -24,6 +24,7 @@
 #include <concepts>
 #include <unordered_map>
 #include <map>
+#include <list>
 
 #include <string>
 #ifdef UNICODE
