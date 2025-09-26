@@ -204,9 +204,6 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 		nInstanceBase += nInstanceCount;
 	}
 
-
-
-
 #endif // INSTANCES_IN_HASHMAP
 
 }

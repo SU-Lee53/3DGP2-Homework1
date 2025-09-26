@@ -75,7 +75,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 
 	// Player
 	{
-		pMi24Model = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
+		std::shared_ptr<GameObject> pMi24Model = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
 		std::shared_ptr<AirplanePlayer> pAirplanePlayer = std::make_shared<AirplanePlayer>(pd3dDevice, pd3dCommandList, m_pd3dRootSignature);
 		std::shared_ptr<ThirdPersonCamera> pCamera = std::make_shared<ThirdPersonCamera>();
 
@@ -103,8 +103,8 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	}
 
 	int xObjects = 1;
-	int yObjects = 1;
-	int zObjects = 1;
+	int yObjects = 0;
+	int zObjects = 0;
 	int i = 0;
 
 	m_nInstance = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
@@ -113,12 +113,12 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	float fxPitch = 200.f;
 	float fyPitch = 100.f;
 	float fzPitch = 200.f;
-	XMFLOAT3 xmf3Pivot = XMFLOAT3(260.0f, 0.0f, 150.0f);
-	//pApacheObject->SetPosition(-75.0f, 0.0f, 80.0f);
+	//XMFLOAT3 xmf3Pivot = XMFLOAT3(260.0f, 0.0f, 150.0f);
+	XMFLOAT3 xmf3Pivot = XMFLOAT3(+130.0f, 0.0f, 160.0f);
 	//pApacheObject->SetScale(1.5f, 1.5f, 1.5f);
 	//pApacheObject->Rotate(0.0f, -90.0f, 0.0f);
 
-	pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Apache.bin");
+	std::shared_ptr<GameObject> pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Apache.bin");
 	for (int x = -xObjects; x <= xObjects; ++x) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			for (int z = 0; z <= 2 * zObjects; ++z) {
@@ -128,22 +128,19 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 				pTankObject->Initialize();
 
 				XMFLOAT3 xmf3Position = Vector3::Add(xmf3Pivot, XMFLOAT3(fxPitch * x, fyPitch * y, fzPitch * z));
-				//pTankObject->SetPosition(xmf3Position);
-				//pTankObject->SetScale(18.0f, 18.0f, 18.0f);
-				//pTankObject->Rotate(0.0f, -90.0f, 0.0f);
-				pTankObject->SetPosition(-75.0f, 0.0f, 80.0f);
+				pTankObject->SetPosition(xmf3Position);
 				pTankObject->SetScale(1.5f, 1.5f, 1.5f);
-				pTankObject->Rotate(0.0f, -90.0f, 0.0f);
+				pTankObject->Rotate(0.0f, 90.0f, 0.0f);
 				m_pGameObjects.push_back(pTankObject);
 			}
 		}
 	}
 
-	//	pApacheModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Apache.bin");
-	//	pGunshipModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
-	//	pSuperCobraModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/SuperCobra.bin");
-	//	pHummerModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Hummer.bin");
-	//	pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/M26.bin");
+	//	std::shared_ptr<GameObject> pApacheModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Apache.bin");
+	//	std::shared_ptr<GameObject> pGunshipModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Gunship.bin");
+	//	std::shared_ptr<GameObject> pSuperCobraModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/SuperCobra.bin");
+	//	std::shared_ptr<GameObject> pHummerModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/Hummer.bin");
+	//	std::shared_ptr<GameObject> pAbramsModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dRootSignature, "../Models/M26.bin");
 
 	//__debugbreak();
 
