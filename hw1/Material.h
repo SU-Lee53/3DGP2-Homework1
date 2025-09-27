@@ -23,6 +23,13 @@ struct MaterialColors {
 	XMFLOAT4 xmf4Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4 xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); //(r,g,b,a=power)
 	XMFLOAT4 xmf4Emissive = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	bool operator==(const MaterialColors& other) const {
+		return XMVector4Equal(XMLoadFloat4(&xmf4Ambient), XMLoadFloat4(&other.xmf4Ambient)) &&
+			XMVector4Equal(XMLoadFloat4(&xmf4Diffuse), XMLoadFloat4(&other.xmf4Diffuse)) &&
+			XMVector4Equal(XMLoadFloat4(&xmf4Specular), XMLoadFloat4(&other.xmf4Specular)) &&
+			XMVector4Equal(XMLoadFloat4(&xmf4Emissive), XMLoadFloat4(&other.xmf4Emissive));
+	}
 };
 
 class Shader;

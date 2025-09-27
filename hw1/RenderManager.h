@@ -46,7 +46,7 @@ public:
 private:
 	std::unordered_map<INSTANCE_KEY, std::vector<INSTANCE_DATA>> m_InstanceMap;
 
-	std::unordered_map<std::string, size_t> m_InstanceIndexMap;
+	std::unordered_map<INSTANCE_KEY, size_t> m_InstanceIndexMap;
 	std::vector<std::pair<INSTANCE_KEY, std::vector<INSTANCE_DATA>>> m_InstanceDatas;
 	size_t m_nInstanceIndex = 0;
 	

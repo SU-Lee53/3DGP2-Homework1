@@ -46,14 +46,14 @@ void RenderManager::Add(std::shared_ptr<GameObject> pGameObject)
 	m_InstanceMap[key].push_back(data);
 
 #else
-	auto it = m_InstanceIndexMap.find(pGameObject->m_strFrameName);
-	if (it == m_InstanceIndexMap.end()) {
-		m_InstanceIndexMap[pGameObject->m_strFrameName] = m_nInstanceIndex++;
+	INSTANCE_KEY key{};
+	key.pMesh = pGameObject->GetMesh();
+	key.pMaterials = pGameObject->GetMaterials();
+	key.uiDescriptorCountPerInstance = key.pMesh->GetSubSetCount() + 1;	// SubSet 별 Material + 인스턴싱용 StructuredBuffer 1개
 
-		INSTANCE_KEY key{};
-		key.pMesh = pGameObject->GetMesh();
-		key.pMaterials = pGameObject->GetMaterials();
-		key.uiDescriptorCountPerInstance = key.pMesh->GetSubSetCount() + 1;	// SubSet 별 Material + 인스턴싱용 StructuredBuffer 1개
+	auto it = m_InstanceIndexMap.find(key);
+	if (it == m_InstanceIndexMap.end()) {
+		m_InstanceIndexMap[key] = m_nInstanceIndex++;
 		m_InstanceDatas.push_back({ key, {} });
 	}
 
@@ -61,7 +61,7 @@ void RenderManager::Add(std::shared_ptr<GameObject> pGameObject)
 	XMStoreFloat4x4(&xmf4x4InstanceData, XMMatrixTranspose(XMLoadFloat4x4(&pGameObject->GetWorldMatrix())));
 
 	INSTANCE_DATA data{ xmf4x4InstanceData };
-	m_InstanceDatas[m_InstanceIndexMap[pGameObject->m_strFrameName]].second.push_back(data);
+	m_InstanceDatas[m_InstanceIndexMap[key]].second.push_back(data);
 
 #endif
 }

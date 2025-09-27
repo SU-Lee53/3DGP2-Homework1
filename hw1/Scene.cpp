@@ -123,8 +123,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			for (int z = 0; z <= 2 * zObjects; ++z) {
 				std::shared_ptr<ApacheObject> pTankObject = std::make_shared<ApacheObject>();
-				std::shared_ptr<GameObject> pAbramsModelCopy = GameObject::CopyObject(*pAbramsModel);
-				pTankObject->SetChild(pAbramsModelCopy);
+				pTankObject->SetChild(RESOURCE->CopyGameObject("Apache"));
 				pTankObject->Initialize();
 
 				XMFLOAT3 xmf3Position = Vector3::Add(xmf3Pivot, XMFLOAT3(fxPitch * x, fyPitch * y, fzPitch * z));

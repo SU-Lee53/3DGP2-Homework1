@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameObject.h"
+#include <filesystem>
 
 GameObject::GameObject()
 {
@@ -387,10 +388,9 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 				std::shared_ptr<Mesh> pMesh;
 				if (pMeshLoadInfo->nType & VERTEX_TYPE_NORMAL) {
 					pMesh = std::make_shared<IlluminatedMesh>(pd3dDevice, pd3dCommandList, *pMeshLoadInfo);
-					RESOURCE->AddMesh(pMeshLoadInfo->strMeshName, pMesh);
 				}
 				if (pMesh) {
-					pGameObject->m_pMesh = RESOURCE->GetMesh(pMeshLoadInfo->strMeshName);
+					pGameObject->m_pMesh = pMesh;
 					BoundingOrientedBox::CreateFromPoints(pGameObject->m_xmOBB, pMeshLoadInfo->xmf3Positions.size(), pMeshLoadInfo->xmf3Positions.data(), sizeof(XMFLOAT3));
 				}
 			}
@@ -411,10 +411,7 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 						pMaterial->SetIlluminatedShader();
 					}
 
-					std::string strMaterialKey = std::format("MAT_{}_{}", pGameObject->m_strFrameName, i);
-					RESOURCE->AddMaterial(strMaterialKey, pMaterial);
-
-					pGameObject->m_pMaterials.push_back(RESOURCE->GetMaterial(strMaterialKey));
+					pGameObject->m_pMaterials.push_back(pMaterial);
 				}
 			}
 			
@@ -443,9 +440,14 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 	return pGameObject;
 }
 
-std::shared_ptr<GameObject> GameObject::LoadGeometryFromFile(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, ComPtr<ID3D12RootSignature> pd3dRootSignature, const std::string& strFileName)
+std::shared_ptr<GameObject> GameObject::LoadGeometryFromFile(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, ComPtr<ID3D12RootSignature> pd3dRootSignature, const std::string& strFilePath)
 {
-	std::ifstream inFile{ strFileName, std::ios::binary };
+	std::string strFileName = std::filesystem::path{ strFilePath }.stem().string();
+	if (auto pObj = RESOURCE->GetGameObject(strFileName)) {
+		return pObj;
+	}
+
+	std::ifstream inFile{ strFilePath, std::ios::binary };
 	if (!inFile) {
 		__debugbreak();
 	}
@@ -464,6 +466,7 @@ std::shared_ptr<GameObject> GameObject::LoadGeometryFromFile(ComPtr<ID3D12Device
 		}
 	}
 
+	RESOURCE->AddGameObject(strFileName, pGameObject);
 	return pGameObject;
 }
 
