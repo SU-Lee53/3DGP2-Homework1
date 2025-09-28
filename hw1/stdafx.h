@@ -25,6 +25,7 @@
 #include <unordered_map>
 #include <map>
 #include <list>
+#include <ranges>
 
 #include <string>
 #ifdef UNICODE
@@ -60,6 +61,12 @@ using namespace DirectX;
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
+
+// ImGui
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_win32.h"
+#include "ImGui/imgui_impl_dx12.h"
+#include "ImGui/imgui_stdlib.h"
 
 #include "ConstantBuffer.h"
 #include "StructuredBuffer.h"

@@ -37,6 +37,14 @@ GameFramework::GameFramework(HINSTANCE hInstance, HWND hWnd, UINT uiWidth, UINT 
 	g_uiDescriptorHandleIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	BuildObjects();
+
+	InitializeImGui();
+}
+
+GameFramework::~GameFramework()
+{
+	WaitForGPUComplete();
+	CleanUpImGui();
 }
 
 void GameFramework::BuildObjects()
@@ -58,57 +66,16 @@ void GameFramework::BuildObjects()
 	m_pScene->ReleaseUploadBuffers();
 }
 
-void GameFramework::ProcessInput()
-{
-	static UCHAR pKeysBuffer[256];
-	bool bProcessedByScene = false;
-	
-	if (GetKeyboardState(pKeysBuffer) && m_pScene) {
-		bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
-	}
-		
-	if (!bProcessedByScene)
-	{
-		DWORD dwDirection = 0;
-		if (pKeysBuffer['W'] & 0xF0)	dwDirection |= MOVE_DIR_FORWARD;
-		if (pKeysBuffer['S'] & 0xF0)	dwDirection |= MOVE_DIR_BACKWARD;
-		if (pKeysBuffer['A'] & 0xF0)	dwDirection |= MOVE_DIR_LEFT;
-		if (pKeysBuffer['D'] & 0xF0)	dwDirection |= MOVE_DIR_RIGHT;
-		if (pKeysBuffer['E'] & 0xF0)	dwDirection |= MOVE_DIR_UP;
-		if (pKeysBuffer['Q'] & 0xF0)	dwDirection |= MOVE_DIR_DOWN;
-
-		float cxDelta = 0.0f, cyDelta = 0.0f;
-		POINT ptCursorPos;
-		if (GetCapture() == m_hWnd)
-		{
-			SetCursor(NULL);
-			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}
-
-		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
-		{
-			auto pPlayer = m_pScene->GetPlayer();
-			if (cxDelta || cyDelta)
-			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-			}
-			if (dwDirection) pPlayer->Move(dwDirection, 1.5f, true);
-		}
-	}
-}
-
 void GameFramework::Update()
 {
 	//OutputDebugStringA(std::format("==================\nTimeElapsed : {}\n==================\n", m_GameTimer.GetTimeElapsed()).c_str());
 	m_GameTimer.Tick(0.0f);
+	UpdateImGui();
+
 	ProcessInput();
 	m_pScene->Update(m_GameTimer.GetTimeElapsed());
+
+	m_pScene->UpdateImGui();
 }
 
 void GameFramework::Render()
@@ -124,6 +91,7 @@ void GameFramework::Render()
 		RENDER->Render(m_pd3dCommandList);
 	}
 
+	RenderImGui();
 	RenderEnd();
 	Present();
 	MoveToNextFrame();
@@ -131,9 +99,63 @@ void GameFramework::Render()
 	TSTRING tstrFrameRate;
 	m_GameTimer.GetFrameRate(L"3DGP-Homework1", tstrFrameRate);
 
-	tstrFrameRate = std::format(L"{} Instance Count : {}, Mesh Count : {}", tstrFrameRate, m_pScene->m_nInstance, RENDER->GetMeshCount());
+	tstrFrameRate = std::format(L"{} Mesh Count : {}", tstrFrameRate, RENDER->GetMeshCount());
 
 	::SetWindowText(m_hWnd, tstrFrameRate.data());
+}
+
+
+void GameFramework::InitializeImGui()
+{
+	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+	{
+		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		desc.NumDescriptors = 1;
+		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		desc.NodeMask = 0;
+	}
+	m_pd3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(m_pFontSrvDescriptorHeap.GetAddressOf()));
+
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsLight();
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplWin32_Init(m_hWnd);
+	ImGui_ImplDX12_Init(m_pd3dDevice.Get(), 2,
+		DXGI_FORMAT_R8G8B8A8_UNORM, m_pFontSrvDescriptorHeap.Get(),
+		m_pFontSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+		m_pFontSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+}
+void GameFramework::UpdateImGui()
+{
+	ImGui_ImplDX12_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+}
+
+void GameFramework::RenderImGui()
+{
+	ImGui::Render();
+
+	m_pd3dCommandList->SetDescriptorHeaps(1, m_pFontSrvDescriptorHeap.GetAddressOf());
+
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pd3dCommandList.Get());
+
+}
+
+void GameFramework::CleanUpImGui()
+{
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 }
 
 void GameFramework::CreateFactory()
@@ -477,17 +499,7 @@ void GameFramework::RenderEnd()
 
 void GameFramework::Present()
 {
-	/*DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
-	dxgiPresentParameters.DirtyRectsCount = 0;
-	dxgiPresentParameters.pDirtyRects = NULL;
-	dxgiPresentParameters.pScrollRect = NULL;
-	dxgiPresentParameters.pScrollOffset = NULL;
-
-	m_pdxgiSwapChain->Present1(1, 0, &dxgiPresentParameters);*/
-
-
 	m_pdxgiSwapChain->Present(0, 0);
-
 }
 
 void GameFramework::MoveToNextFrame()
@@ -502,6 +514,48 @@ void GameFramework::MoveToNextFrame()
 	}
 }
 
+void GameFramework::ProcessInput()
+{
+	static UCHAR pKeysBuffer[256];
+	bool bProcessedByScene = false;
+
+	if (GetKeyboardState(pKeysBuffer) && m_pScene) {
+		bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
+	}
+
+	if (!bProcessedByScene)
+	{
+		DWORD dwDirection = 0;
+		if (pKeysBuffer['W'] & 0xF0)	dwDirection |= MOVE_DIR_FORWARD;
+		if (pKeysBuffer['S'] & 0xF0)	dwDirection |= MOVE_DIR_BACKWARD;
+		if (pKeysBuffer['A'] & 0xF0)	dwDirection |= MOVE_DIR_LEFT;
+		if (pKeysBuffer['D'] & 0xF0)	dwDirection |= MOVE_DIR_RIGHT;
+		if (pKeysBuffer['E'] & 0xF0)	dwDirection |= MOVE_DIR_UP;
+		if (pKeysBuffer['Q'] & 0xF0)	dwDirection |= MOVE_DIR_DOWN;
+
+		if ((dwDirection != 0) || (pKeysBuffer[VK_RBUTTON] & 0xF0)) {
+			auto pPlayer = m_pScene->GetPlayer();
+
+			float cxDelta = 0.0f, cyDelta = 0.0f;
+			POINT ptCursorPos;
+
+			if (pKeysBuffer[VK_RBUTTON] & 0xF0) {
+				SetCursor(NULL);
+				GetCursorPos(&ptCursorPos);
+				cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+				cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+				SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+
+				if (cxDelta || cyDelta) {
+					pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				}
+			}
+
+			if (dwDirection) pPlayer->Move(dwDirection, 1.5f, true);
+		}
+	}
+}
+
 void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) {
@@ -511,6 +565,7 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+		break;
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);

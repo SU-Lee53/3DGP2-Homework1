@@ -26,6 +26,8 @@ public:
 	virtual void CreateShaderVariables(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 	virtual void UpdateShaderVariable(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 
+	void UpdateImGui();
+
 private:
 	void CreateRootSignature(ComPtr<ID3D12Device> pd3dDevice);
 
@@ -54,6 +56,10 @@ public:
 	int m_nInstance = 0;
 
 private:
-	// Model Cache
+	// Preloaded Instances
+	std::map<std::string, std::vector<std::shared_ptr<GameObject>>> m_pPreLoadedObjects;
+	std::vector<std::string> m_strObjNames;
+	int m_nObjectSelected = 0;
+	int m_nObjectCount = 100;
 };
 
