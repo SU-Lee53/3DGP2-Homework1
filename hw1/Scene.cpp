@@ -109,11 +109,12 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pPlayer->SetMaxVelocityXZ(125.5f);
 		m_pPlayer->SetMaxVelocityY(140.0f);
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 1500.0f, -1500.0f));
 	}
 
-	int xObjects = 10;
-	int yObjects = 10;
-	int zObjects = 10;
+	int xObjects = 8;
+	int yObjects = 8;
+	int zObjects = 8;
 	int i = 0;
 
 	m_nInstance = (xObjects * 2) * (yObjects * 2) * (zObjects * 2);
@@ -126,11 +127,11 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	// Apache
 	m_strObjNames.emplace_back("Apache");
 	m_pPreLoadedObjects["Apache"].reserve(m_nInstance);
-	for (int x = -xObjects; x <= xObjects; ++x) {
-		if (x == 0) continue;
+	for (int z = 1; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			if (y == 0) continue;
-			for (int z = 1; z <= (2 * zObjects); ++z) {
+			for (int x = -xObjects; x <= xObjects; ++x) {
+				if (x == 0) continue;
 				std::shared_ptr<ApacheObject> pObject = std::make_shared<ApacheObject>();
 				pObject->SetChild(RESOURCE->CopyGameObject("Apache"));
 				pObject->Initialize();
@@ -147,11 +148,11 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	// Gunship
 	m_strObjNames.emplace_back("Gunship");
 	m_pPreLoadedObjects["Gunship"].reserve(m_nInstance);
-	for (int x = -xObjects; x <= xObjects; ++x) {
-		if (x == 0) continue;
+	for (int z = 1; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			if (y == 0) continue;
-			for (int z = 1; z <= (2 * zObjects); ++z) {
+			for (int x = -xObjects; x <= xObjects; ++x) {
+				if (x == 0) continue;
 				std::shared_ptr<GunshipObject> pObject = std::make_shared<GunshipObject>();
 				pObject->SetChild(RESOURCE->CopyGameObject("Gunship"));
 				pObject->Initialize();
@@ -168,11 +169,11 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	// SuperCobra
 	m_strObjNames.emplace_back("SuperCobra");
 	m_pPreLoadedObjects["SuperCobra"].reserve(m_nInstance);
-	for (int x = -xObjects; x <= xObjects; ++x) {
-		if (x == 0) continue;
+	for (int z = 1; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			if (y == 0) continue;
-			for (int z = 1; z <= (2 * zObjects); ++z) {
+			for (int x = -xObjects; x <= xObjects; ++x) {
+				if (x == 0) continue;
 				std::shared_ptr<SuperCobraObject> pObject = std::make_shared<SuperCobraObject>();
 				pObject->SetChild(RESOURCE->CopyGameObject("SuperCobra"));
 				pObject->Initialize();
@@ -189,11 +190,11 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	// Hummer
 	m_strObjNames.emplace_back("Hummer");
 	m_pPreLoadedObjects["Hummer"].reserve(m_nInstance);
-	for (int x = -xObjects; x <= xObjects; ++x) {
-		if (x == 0) continue;
+	for (int z = 1; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			if (y == 0) continue;
-			for (int z = 1; z <= (2 * zObjects); ++z) {
+			for (int x = -xObjects; x <= xObjects; ++x) {
+				if (x == 0) continue;
 				std::shared_ptr<HummerObject> pObject = std::make_shared<HummerObject>();
 				pObject->SetChild(RESOURCE->CopyGameObject("Hummer"));
 				pObject->Initialize();
@@ -210,11 +211,11 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	// M26
 	m_strObjNames.emplace_back("M26");
 	m_pPreLoadedObjects["M26"].reserve(m_nInstance);
-	for (int x = -xObjects; x <= xObjects; ++x) {
-		if (x == 0) continue;
+	for (int z = 1; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			if (y == 0) continue;
-			for (int z = 1; z <= (2 * zObjects); ++z) {
+			for (int x = -xObjects; x <= xObjects; ++x) {
+				if (x == 0) continue;
 				std::shared_ptr<M26Object> pObject = std::make_shared<M26Object>();
 				pObject->SetChild(RESOURCE->CopyGameObject("M26"));
 				pObject->Initialize();
@@ -231,11 +232,11 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	// Mi24
 	m_strObjNames.emplace_back("Mi24");
 	m_pPreLoadedObjects["Mi24"].reserve(m_nInstance);
-	for (int x = -xObjects; x <= xObjects; ++x) {
-		if (x == 0) continue;
+	for (int z = 1; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			if (y == 0) continue;
-			for (int z = 1; z <= (2 * zObjects); ++z) {
+			for (int x = -xObjects; x <= xObjects; ++x) {
+				if (x == 0) continue;
 				std::shared_ptr<Mi24Object> pObject = std::make_shared<Mi24Object>();
 				pObject->SetChild(RESOURCE->CopyGameObject("Mi24"));
 				pObject->Initialize();
