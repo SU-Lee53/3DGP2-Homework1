@@ -51,7 +51,7 @@ public:
 
 	std::shared_ptr<GameObject> GetParent() { return m_pParent; }
 	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
-	std::shared_ptr<GameObject> FindFrame(const std::string& svFrameName);
+	std::shared_ptr<GameObject> FindFrame(const std::string& strFrameName);
 
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0); }
 
@@ -97,46 +97,14 @@ public:
 
 };
 
-class RotatingObject : public GameObject {
-public:
-	RotatingObject();
-	virtual ~RotatingObject();
-
-private:
-	XMFLOAT3					m_xmf3RotationAxis;
-	float						m_fRotationSpeed;
-
-public:
-	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
-	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
-
-	virtual void Animate(float fTimeElapsed) override;
-};
-
-class RevolvingObject : public GameObject {
-public:
-	RevolvingObject();
-	virtual ~RevolvingObject();
-
-private:
-	XMFLOAT3					m_xmf3RevolutionAxis;
-	float						m_fRevolutionSpeed;
-
-public:
-	void SetRevolutionSpeed(float fRevolutionSpeed) { m_fRevolutionSpeed = fRevolutionSpeed; }
-	void SetRevolutionAxis(XMFLOAT3 xmf3RevolutionAxis) { m_xmf3RevolutionAxis = xmf3RevolutionAxis; }
-
-	virtual void Animate(float fTimeElapsed) override;
-};
-
 class HellicopterObject : public GameObject {
 public:
 	HellicopterObject();
 	virtual ~HellicopterObject();
 
 protected:
-	std::shared_ptr<GameObject> m_pMainRotorFrame = NULL;
-	std::shared_ptr<GameObject> m_pTailRotorFrame = NULL;
+	std::shared_ptr<GameObject> m_pMainRotorFrame = nullptr;
+	std::shared_ptr<GameObject> m_pTailRotorFrame = nullptr;
 
 public:
 	virtual void Initialize() override;
@@ -186,6 +154,15 @@ class HummerObject : public GameObject {
 public:
 	HummerObject();
 	virtual ~HummerObject();
+
+	virtual void Initialize() override;
+	virtual void Animate(float fTimeElapsed) override;
+protected:
+	std::shared_ptr<GameObject> m_pLFWheelFrame = nullptr;
+	std::shared_ptr<GameObject> m_pLRWheelFrame = nullptr;
+	std::shared_ptr<GameObject> m_pRFWheelFrame = nullptr;
+	std::shared_ptr<GameObject> m_pRRWheelFrame = nullptr;
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -196,9 +173,9 @@ public:
 	virtual ~TankObject();
 
 protected:
-	std::shared_ptr<GameObject> m_pTurretFrame = NULL;
-	std::shared_ptr<GameObject> m_pCannonFrame = NULL;
-	std::shared_ptr<GameObject> m_pGunFrame = NULL;
+	std::shared_ptr<GameObject> m_pTurretFrame = nullptr;
+	std::shared_ptr<GameObject> m_pCannonFrame = nullptr;
+	std::shared_ptr<GameObject> m_pGunFrame = nullptr;
 
 public:
 	virtual void Initialize() override;

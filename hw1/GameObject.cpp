@@ -146,22 +146,21 @@ void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 void GameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
-	//m_xmOBB.Transform(m_xmOBBWorld, XMLoadFloat4x4(&m_xmf4x4World));
 
 	for (auto& pChild : m_pChildren) {
 		pChild->UpdateTransform(&m_xmf4x4World);
 	}
 }
 
-std::shared_ptr<GameObject> GameObject::FindFrame(const std::string& svFrameName)
+std::shared_ptr<GameObject> GameObject::FindFrame(const std::string& strFrameName)
 {
 	std::shared_ptr<GameObject> pFrameObject;
-	if (svFrameName == m_strFrameName) {
+	if (strFrameName == m_strFrameName) {
 		return shared_from_this();
 	}
 
 	for (auto& pChild : m_pChildren) {
-		if (pFrameObject = pChild->FindFrame(svFrameName)) {
+		if (pFrameObject = pChild->FindFrame(strFrameName)) {
 			return pFrameObject;
 		}
 	}
@@ -492,48 +491,6 @@ std::shared_ptr<GameObject> GameObject::CopyObject(const GameObject& srcObject, 
 	return pClone;
 }
 
-////////////////////
-// RotatingObject //
-////////////////////
-
-RotatingObject::RotatingObject()
-{
-	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_fRotationSpeed = 15.0f;
-}
-
-RotatingObject::~RotatingObject()
-{
-}
-
-void RotatingObject::Animate(float fTimeElapsed)
-{
-	GameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
-	GameObject::Animate(fTimeElapsed);
-}
-
-////////////////////
-// RotatingObject //
-////////////////////
-
-RevolvingObject::RevolvingObject()
-{
-	m_xmf3RevolutionAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_fRevolutionSpeed = 0.0f;
-}
-
-RevolvingObject::~RevolvingObject()
-{
-}
-
-void RevolvingObject::Animate(float fTimeElapsed)
-{
-	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed));
-	m_xmf4x4Transform = Matrix4x4::Multiply(m_xmf4x4Transform, mtxRotate);
-
-	GameObject::Animate(fTimeElapsed);
-}
-
 ///////////////////////
 // HellicopterObject //
 ///////////////////////
@@ -664,6 +621,43 @@ HummerObject::HummerObject()
 
 HummerObject::~HummerObject()
 {
+}
+
+void HummerObject::Initialize()
+{
+	m_pLFWheelFrame = FindFrame("wheel_LF");
+	m_pLRWheelFrame = FindFrame("wheel_LR");
+	m_pRFWheelFrame = FindFrame("Wheel_RF");
+	m_pRRWheelFrame = FindFrame("wheel_RR");
+}
+
+void HummerObject::Animate(float fTimeElapsed)
+{
+	if (m_pLFWheelFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+		m_pLFWheelFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pLFWheelFrame->m_xmf4x4Transform);
+	}
+	
+	if (m_pLRWheelFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+		m_pLRWheelFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pLRWheelFrame->m_xmf4x4Transform);
+	}
+	
+	if (m_pRFWheelFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+		m_pRFWheelFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pRFWheelFrame->m_xmf4x4Transform);
+	}
+	
+	if (m_pRRWheelFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+		m_pRRWheelFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pRRWheelFrame->m_xmf4x4Transform);
+	}
+
+	GameObject::Animate(fTimeElapsed);
 }
 
 ////////////////

@@ -333,12 +333,12 @@ void Scene::Render(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommand
 	pd3dCommandList->SetGraphicsRootDescriptorTable(0, RENDER->GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
 
 	if (m_pPlayer) {
-		m_pPlayer->UpdateTransform(nullptr);
+		m_pPlayer->UpdateTransform();
 		m_pPlayer->AddToRenderMap();
 	}
 
 	for (auto& pObj : m_pPreLoadedObjects[m_strObjNames[m_nObjectSelected]] | std::views::take(m_nObjectCount)) {
-		pObj->UpdateTransform(nullptr);
+		pObj->UpdateTransform();
 		pObj->AddToRenderMap();
 	}
 }
