@@ -16,9 +16,6 @@
     <Filter Include="소스 파일\Shader">
       <UniqueIdentifier>{c044177b-ef22-492e-bfbf-4e52691edb05}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\ImGui">
-      <UniqueIdentifier>{ea6b26d6-8870-487a-a94b-e23e157214a0}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -78,33 +75,6 @@
     <ClInclude Include="Player.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\imgui_impl_dx12.h">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\imgui_impl_win32.h">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\imgui_internal.h">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\imgui_stdlib.h">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\imstb_rectpack.h">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\imstb_textedit.h">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\imstb_truetype.h">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\imconfig.h">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGui\imgui.h">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="hw1.cpp">
@@ -158,30 +128,6 @@
     <ClCompile Include="Player.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ImGui\imgui_impl_win32.cpp">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\imgui_stdlib.cpp">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\imgui_tables.cpp">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\imgui_widgets.cpp">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\imgui.cpp">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\imgui_demo.cpp">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\imgui_draw.cpp">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGui\imgui_impl_dx12.cpp">
-      <Filter>소스 파일\ImGui</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="hw1.rc">
@@ -206,10 +152,5 @@
     <FxCompile Include="Common.hlsl">
       <Filter>소스 파일\Shader</Filter>
     </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ImGui\LICENSE.txt">
-      <Filter>소스 파일\ImGui</Filter>
-    </Text>
   </ItemGroup>
 </Project>

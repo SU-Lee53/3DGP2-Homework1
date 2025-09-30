@@ -38,17 +38,6 @@ public:
 	static std::unique_ptr<ResourceManager> g_pResourceManager;
 	static std::unique_ptr<RenderManager> g_pRenderManager;
 
-#pragma region ImGui
-private:
-	void InitializeImGui();
-	void UpdateImGui();
-	void RenderImGui();
-	void CleanUpImGui();
-
-	ComPtr<ID3D12DescriptorHeap> m_pFontSrvDescriptorHeap = nullptr;
-#pragma endregion
-
-
 #pragma region D3D
 private:
 	void CreateFactory();

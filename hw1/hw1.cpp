@@ -17,9 +17,6 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 HWND                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-
 GameFramework* g_pGameFramework = nullptr;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -128,10 +125,6 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam)) {
-        return true;
-    }
-
     int wmId, wmEvent;
     PAINTSTRUCT ps;
     HDC hdc;

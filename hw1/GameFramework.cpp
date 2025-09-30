@@ -37,14 +37,11 @@ GameFramework::GameFramework(HINSTANCE hInstance, HWND hWnd, UINT uiWidth, UINT 
 	g_uiDescriptorHandleIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	BuildObjects();
-
-	InitializeImGui();
 }
 
 GameFramework::~GameFramework()
 {
 	WaitForGPUComplete();
-	CleanUpImGui();
 }
 
 void GameFramework::BuildObjects()
@@ -70,7 +67,6 @@ void GameFramework::Update()
 {
 	//OutputDebugStringA(std::format("==================\nTimeElapsed : {}\n==================\n", m_GameTimer.GetTimeElapsed()).c_str());
 	m_GameTimer.Tick(0.0f);
-	UpdateImGui();
 
 	ProcessInput();
 	m_pScene->Update(m_GameTimer.GetTimeElapsed());
@@ -91,7 +87,6 @@ void GameFramework::Render()
 		RENDER->Render(m_pd3dCommandList);
 	}
 
-	RenderImGui();
 	RenderEnd();
 	Present();
 	MoveToNextFrame();
@@ -99,63 +94,9 @@ void GameFramework::Render()
 	TSTRING tstrFrameRate;
 	m_GameTimer.GetFrameRate(L"3DGP-Homework1", tstrFrameRate);
 
-	tstrFrameRate = std::format(L"{} Mesh Count : {}", tstrFrameRate, RENDER->GetMeshCount());
+	tstrFrameRate = std::format(L"{} Mesh Count : {} Instance Count : {}", tstrFrameRate, RENDER->GetMeshCount(), m_pScene->GetObjectCount());
 
 	::SetWindowText(m_hWnd, tstrFrameRate.data());
-}
-
-
-void GameFramework::InitializeImGui()
-{
-	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-	{
-		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		desc.NumDescriptors = 1;
-		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		desc.NodeMask = 0;
-	}
-	m_pd3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(m_pFontSrvDescriptorHeap.GetAddressOf()));
-
-	// Setup Dear ImGui context
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-	// Setup Dear ImGui style
-	ImGui::StyleColorsDark();
-	//ImGui::StyleColorsLight();
-
-	// Setup Platform/Renderer backends
-	ImGui_ImplWin32_Init(m_hWnd);
-	ImGui_ImplDX12_Init(m_pd3dDevice.Get(), 2,
-		DXGI_FORMAT_R8G8B8A8_UNORM, m_pFontSrvDescriptorHeap.Get(),
-		m_pFontSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-		m_pFontSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-}
-void GameFramework::UpdateImGui()
-{
-	ImGui_ImplDX12_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
-}
-
-void GameFramework::RenderImGui()
-{
-	ImGui::Render();
-
-	m_pd3dCommandList->SetDescriptorHeaps(1, m_pFontSrvDescriptorHeap.GetAddressOf());
-
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pd3dCommandList.Get());
-
-}
-
-void GameFramework::CleanUpImGui()
-{
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
 }
 
 void GameFramework::CreateFactory()

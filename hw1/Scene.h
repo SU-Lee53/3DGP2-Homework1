@@ -39,10 +39,11 @@ public:
 	std::shared_ptr<Camera> GetCamera() const;
 	const ConstantBuffer& GetCBuffer() const { return m_LightCBuffer; }
 	std::shared_ptr<Player> GetPlayer() const;
+	UINT GetObjectCount() const { return m_nObjectCount; }
 
 private:
 	std::shared_ptr<Player>						m_pPlayer;
-	std::vector<std::shared_ptr<GameObject>>	m_pGameObjects;
+	//std::vector<std::shared_ptr<GameObject>>	m_pGameObjects;
 	std::vector<std::shared_ptr<Light>>			m_pLights;
 	XMFLOAT4									m_xmf4GlobalAmbient;
 
@@ -57,9 +58,8 @@ public:
 
 private:
 	// Preloaded Instances
-	std::map<std::string, std::vector<std::shared_ptr<GameObject>>> m_pPreLoadedObjects;
-	std::vector<std::string> m_strObjNames;
+	std::vector<std::vector<std::shared_ptr<GameObject>>> m_pPreLoadedObjects;
 	int m_nObjectSelected = 0;
-	int m_nObjectCount = 100;
+	int m_nObjectCount = 500;
 };
 

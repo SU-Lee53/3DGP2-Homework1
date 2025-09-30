@@ -109,29 +109,28 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 		m_pPlayer->SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		m_pPlayer->SetMaxVelocityXZ(125.5f);
 		m_pPlayer->SetMaxVelocityY(140.0f);
-		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 1500.0f, -1500.0f));
+		m_pPlayer->SetPosition(XMFLOAT3(0.0f, 500.0f, -500.0f));
 	}
 
-	int xObjects = 8;
-	int yObjects = 8;
-	int zObjects = 8;
+	int xObjects = 10;
+	int yObjects = 10;
+	int zObjects = 10;
 	int i = 0;
 
-	m_nInstance = (xObjects * 2) * (yObjects * 2) * (zObjects * 2);
+	m_nInstance = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
 
 	float fxPitch = 200.f;
 	float fyPitch = 100.f;
 	float fzPitch = 200.f;
 	XMFLOAT3 xmf3Pivot = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
+	m_pPreLoadedObjects.resize(6);
+
 	// Apache
-	m_strObjNames.emplace_back("Apache");
-	m_pPreLoadedObjects["Apache"].reserve(m_nInstance);
-	for (int z = 1; z <= (2 * zObjects); ++z) {
+	m_pPreLoadedObjects[0].reserve(m_nInstance);
+	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
-			if (y == 0) continue;
 			for (int x = -xObjects; x <= xObjects; ++x) {
-				if (x == 0) continue;
 				std::shared_ptr<ApacheObject> pObject = std::make_shared<ApacheObject>();
 				pObject->SetChild(RESOURCE->CopyGameObject("Apache"));
 				pObject->Initialize();
@@ -140,19 +139,16 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 				pObject->SetPosition(xmf3Position);
 				pObject->SetScale(1.5f, 1.5f, 1.5f);
 				pObject->Rotate(0.0f, -90.0f, 0.0f);
-				m_pPreLoadedObjects["Apache"].push_back(pObject);
+				m_pPreLoadedObjects[0].push_back(pObject);
 			}
 		}
 	}
 
 	// Gunship
-	m_strObjNames.emplace_back("Gunship");
-	m_pPreLoadedObjects["Gunship"].reserve(m_nInstance);
-	for (int z = 1; z <= (2 * zObjects); ++z) {
+	m_pPreLoadedObjects[1].reserve(m_nInstance);
+	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
-			if (y == 0) continue;
 			for (int x = -xObjects; x <= xObjects; ++x) {
-				if (x == 0) continue;
 				std::shared_ptr<GunshipObject> pObject = std::make_shared<GunshipObject>();
 				pObject->SetChild(RESOURCE->CopyGameObject("Gunship"));
 				pObject->Initialize();
@@ -161,19 +157,16 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 				pObject->SetPosition(xmf3Position);
 				pObject->SetScale(8.5f, 8.5f, 8.5f);
 				pObject->Rotate(0.0f, -90.0f, 0.0f);
-				m_pPreLoadedObjects["Gunship"].push_back(pObject);
+				m_pPreLoadedObjects[1].push_back(pObject);
 			}
 		}
 	}
 
 	// SuperCobra
-	m_strObjNames.emplace_back("SuperCobra");
-	m_pPreLoadedObjects["SuperCobra"].reserve(m_nInstance);
-	for (int z = 1; z <= (2 * zObjects); ++z) {
+	m_pPreLoadedObjects[2].reserve(m_nInstance);
+	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
-			if (y == 0) continue;
 			for (int x = -xObjects; x <= xObjects; ++x) {
-				if (x == 0) continue;
 				std::shared_ptr<SuperCobraObject> pObject = std::make_shared<SuperCobraObject>();
 				pObject->SetChild(RESOURCE->CopyGameObject("SuperCobra"));
 				pObject->Initialize();
@@ -182,19 +175,16 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 				pObject->SetPosition(xmf3Position);
 				pObject->SetScale(10.0f, 10.0f, 10.0f);
 				pObject->Rotate(0.0f, -90.0f, 0.0f);
-				m_pPreLoadedObjects["SuperCobra"].push_back(pObject);
+				m_pPreLoadedObjects[2].push_back(pObject);
 			}
 		}
 	}
 
 	// Hummer
-	m_strObjNames.emplace_back("Hummer");
-	m_pPreLoadedObjects["Hummer"].reserve(m_nInstance);
-	for (int z = 1; z <= (2 * zObjects); ++z) {
+	m_pPreLoadedObjects[3].reserve(m_nInstance);
+	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
-			if (y == 0) continue;
 			for (int x = -xObjects; x <= xObjects; ++x) {
-				if (x == 0) continue;
 				std::shared_ptr<HummerObject> pObject = std::make_shared<HummerObject>();
 				pObject->SetChild(RESOURCE->CopyGameObject("Hummer"));
 				pObject->Initialize();
@@ -203,19 +193,16 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 				pObject->SetPosition(xmf3Position);
 				pObject->SetScale(18.0f, 18.0f, 18.0f);
 				pObject->Rotate(0.0f, -90.0f, 0.0f);
-				m_pPreLoadedObjects["Hummer"].push_back(pObject);
+				m_pPreLoadedObjects[3].push_back(pObject);
 			}
 		}
 	}
 
 	// M26
-	m_strObjNames.emplace_back("M26");
-	m_pPreLoadedObjects["M26"].reserve(m_nInstance);
-	for (int z = 1; z <= (2 * zObjects); ++z) {
+	m_pPreLoadedObjects[4].reserve(m_nInstance);
+	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
-			if (y == 0) continue;
 			for (int x = -xObjects; x <= xObjects; ++x) {
-				if (x == 0) continue;
 				std::shared_ptr<M26Object> pObject = std::make_shared<M26Object>();
 				pObject->SetChild(RESOURCE->CopyGameObject("M26"));
 				pObject->Initialize();
@@ -224,19 +211,16 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 				pObject->SetPosition(xmf3Position);
 				pObject->SetScale(18.0f, 18.0f, 18.0f);
 				pObject->Rotate(0.0f, -90.0f, 0.0f);
-				m_pPreLoadedObjects["M26"].push_back(pObject);
+				m_pPreLoadedObjects[4].push_back(pObject);
 			}
 		}
 	}
 
 	// Mi24
-	m_strObjNames.emplace_back("Mi24");
-	m_pPreLoadedObjects["Mi24"].reserve(m_nInstance);
-	for (int z = 1; z <= (2 * zObjects); ++z) {
+	m_pPreLoadedObjects[5].reserve(m_nInstance);
+	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
-			if (y == 0) continue;
 			for (int x = -xObjects; x <= xObjects; ++x) {
-				if (x == 0) continue;
 				std::shared_ptr<Mi24Object> pObject = std::make_shared<Mi24Object>();
 				pObject->SetChild(RESOURCE->CopyGameObject("Mi24"));
 				pObject->Initialize();
@@ -245,13 +229,13 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 				pObject->SetPosition(xmf3Position);
 				pObject->SetScale(8.f, 8.f, 8.f);
 				pObject->Rotate(0.0f, -90.0f, 0.0f);
-				m_pPreLoadedObjects["Mi24"].push_back(pObject);
+				m_pPreLoadedObjects[5].push_back(pObject);
 			}
 		}
 	}
 
-	m_pGameObjects.reserve(m_nInstance);
-	std::copy(m_pPreLoadedObjects[m_strObjNames[m_nObjectSelected]].begin(), m_pPreLoadedObjects[m_strObjNames[m_nObjectSelected]].end(), std::back_inserter(m_pGameObjects));
+	//m_pGameObjects.reserve(m_nInstance);
+	//std::copy(m_pPreLoadedObjects[m_nObjectSelected].begin(), m_pPreLoadedObjects[m_nObjectSelected].end(), std::back_inserter(m_pGameObjects));
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -260,13 +244,34 @@ void Scene::ReleaseUploadBuffers()
 {
 	m_pPlayer->ReleaseUploadBuffers();
 
-	for (auto& pObj : m_pGameObjects) {
-		pObj->ReleaseUploadBuffers();
+	for (auto& objs : m_pPreLoadedObjects) {
+		for (auto& pObj : objs) {
+			pObj->ReleaseUploadBuffers();
+		}
 	}
 }
 
 bool Scene::ProcessInput(UCHAR* pKeysBuffer)
 {
+	if (pKeysBuffer['1'] & 0xF0)	m_nObjectSelected = 0;
+	if (pKeysBuffer['2'] & 0xF0)	m_nObjectSelected = 1;
+	if (pKeysBuffer['3'] & 0xF0)	m_nObjectSelected = 2;
+	if (pKeysBuffer['4'] & 0xF0)	m_nObjectSelected = 3;
+	if (pKeysBuffer['5'] & 0xF0)	m_nObjectSelected = 4;
+	if (pKeysBuffer['6'] & 0xF0)	m_nObjectSelected = 5;
+
+	if (pKeysBuffer[VK_RIGHT]	& 0xF0)		m_nObjectCount += 1;
+	if (pKeysBuffer[VK_LEFT]	& 0xF0)		m_nObjectCount -= 1;
+	if (pKeysBuffer[VK_UP]		& 0xF0)		m_nObjectCount += 10;
+	if (pKeysBuffer[VK_DOWN]	& 0xF0)		m_nObjectCount -= 10;
+	if (pKeysBuffer[VK_HOME]	& 0xF0)		m_nObjectCount += 100;
+	if (pKeysBuffer[VK_END]		& 0xF0)		m_nObjectCount -= 100;
+	if (pKeysBuffer[VK_PRIOR]	& 0xF0)		m_nObjectCount += 1000;
+	if (pKeysBuffer[VK_NEXT]	& 0xF0)		m_nObjectCount -= 1000;
+	
+
+	m_nObjectCount = std::clamp(m_nObjectCount, 0, m_nInstance);
+
 	return false;
 }
 
@@ -276,7 +281,7 @@ void Scene::Update(float fTimeElapsed)
 		m_pPlayer->Update(fTimeElapsed);
 	}
 	
-	for (auto& pObj : m_pPreLoadedObjects[m_strObjNames[m_nObjectSelected]] | std::views::take(m_nObjectCount)) {
+	for (auto& pObj : m_pPreLoadedObjects[m_nObjectSelected] | std::views::take(m_nObjectCount)) {
 		pObj->Update(fTimeElapsed);
 	}
 
@@ -290,26 +295,6 @@ void Scene::Update(float fTimeElapsed)
 
 void Scene::UpdateImGui()
 {
-	ImGui::Begin("InstanceController");
-	
-	if (ImGui::BeginCombo("Model", m_strObjNames[m_nObjectSelected].c_str())) {
-		for (int i = 0; i < m_strObjNames.size(); ++i) {
-			const bool bSelected = (m_nObjectSelected == i);
-			if (ImGui::Selectable(m_strObjNames[i].c_str(), bSelected)) {
-				m_nObjectSelected = i;
-			}
-
-			if (bSelected) {
-				ImGui::SetItemDefaultFocus();
-			}
-		}
-
-		ImGui::EndCombo();
-	}
-	ImGui::SliderInt("Instance Count", &m_nObjectCount, 0, m_nInstance);
-
-
-	ImGui::End();
 }
 
 void Scene::Render(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
@@ -337,7 +322,7 @@ void Scene::Render(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommand
 		m_pPlayer->AddToRenderMap();
 	}
 
-	for (auto& pObj : m_pPreLoadedObjects[m_strObjNames[m_nObjectSelected]] | std::views::take(m_nObjectCount)) {
+	for (auto& pObj : m_pPreLoadedObjects[m_nObjectSelected] | std::views::take(m_nObjectCount)) {
 		pObj->UpdateTransform();
 		pObj->AddToRenderMap();
 	}
