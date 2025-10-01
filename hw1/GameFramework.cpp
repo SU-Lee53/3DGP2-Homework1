@@ -71,7 +71,6 @@ void GameFramework::Update()
 	ProcessInput();
 	m_pScene->Update(m_GameTimer.GetTimeElapsed());
 
-	m_pScene->UpdateImGui();
 }
 
 void GameFramework::Render()

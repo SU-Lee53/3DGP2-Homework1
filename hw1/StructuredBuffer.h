@@ -24,10 +24,10 @@ public:
 	template<typename T>
 	void UpdateData(const T& const data, UINT index);
 
-	void SetBufferToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT uiOffset, UINT uiElementSize, UINT uiRootParameterIndex) const;
+	void SetBufferToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT uiRootParameterIndex) const;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(UINT offset = 0) const;
-	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(UINT offset = 0) const;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle() const;
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() const;
 
 private:
 	ComPtr<ID3D12DescriptorHeap>	m_pd3dSRVHeap = nullptr;

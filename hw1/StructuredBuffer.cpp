@@ -57,26 +57,18 @@ void StructuredBuffer::Create(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12Grap
 	}
 }
 
-void StructuredBuffer::SetBufferToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT uiOffset, UINT uiElementSize, UINT uiRootParameterIndex) const
+void StructuredBuffer::SetBufferToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, UINT uiRootParameterIndex) const
 {
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGPUAddress = m_pd3dSBuffer->GetGPUVirtualAddress();
-	d3dGPUAddress += (uiOffset * uiElementSize);
-
 	pd3dCommandList->SetGraphicsRootShaderResourceView(uiRootParameterIndex, d3dGPUAddress);
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE StructuredBuffer::GetCPUDescriptorHandle(UINT offset) const
+D3D12_CPU_DESCRIPTOR_HANDLE StructuredBuffer::GetCPUDescriptorHandle() const
 {
-	assert(m_pd3dSRVHeap);
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dCPUHandle = m_pd3dSRVHeap->GetCPUDescriptorHandleForHeapStart();
-	d3dCPUHandle.ptr += (GameFramework::g_uiDescriptorHandleIncrementSize * offset);
-	return d3dCPUHandle;
+	return m_pd3dSRVHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE StructuredBuffer::GetGPUDescriptorHandle(UINT offset) const
+D3D12_GPU_DESCRIPTOR_HANDLE StructuredBuffer::GetGPUDescriptorHandle() const
 {
-	assert(m_pd3dSRVHeap);
-	D3D12_GPU_DESCRIPTOR_HANDLE d3dGPUHandle = m_pd3dSRVHeap->GetGPUDescriptorHandleForHeapStart();
-	d3dGPUHandle.ptr += (GameFramework::g_uiDescriptorHandleIncrementSize * offset);
-	return d3dGPUHandle;
+	return m_pd3dSRVHeap->GetGPUDescriptorHandleForHeapStart();
 }

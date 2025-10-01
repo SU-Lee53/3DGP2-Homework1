@@ -7,9 +7,9 @@
 
 cbuffer cbCameraInfo : register(b0)
 {
-    matrix gmtxView : packoffset(c0);
-    matrix gmtxProjection : packoffset(c4);
-    float3 gvCameraPosition : packoffset(c8);
+    matrix gmtxView;
+    matrix gmtxProjection;
+    float3 gvCameraPosition;
 };
 
 
@@ -72,17 +72,16 @@ cbuffer cbGameObjectInfo : register(b2)
 // Instancing Data // 
 /////////////////////
 
-struct INSTANCE_DATA
-{
-    matrix mtxGameObject;
-};
+//struct INSTANCE_DATA
+//{
+//    matrix mtxGameObject;
+//};
 
-StructuredBuffer<INSTANCE_DATA> sbInstanceData : register(t0);
+StructuredBuffer<matrix> sbInstanceData : register(t0);
 
 cbuffer cbInstanceInfo : register(b3)
 {
     int gnBaseIndex;
-    int gnInstanceCount;
 }
 
 

@@ -14,17 +14,16 @@
 
 class ResourceManager {
 public:
-	// Add 함수는 Key 값이 겹치면 nullptr 를 리턴하도록 함
-	std::shared_ptr<GameObject> AddGameObject(const std::string& svObjKey, std::shared_ptr<GameObject> pObject);
-	std::shared_ptr<GameObject> GetGameObject(const std::string& svObjKey);
-	std::shared_ptr<GameObject> CopyGameObject(const std::string& svObjKey);
+	std::shared_ptr<GameObject> AddGameObject(const std::string& strObjKey, std::shared_ptr<GameObject> pObject);
+	std::shared_ptr<GameObject> GetGameObject(const std::string& strObjKey);
+	std::shared_ptr<GameObject> CopyGameObject(const std::string& strObjKey);
 
 
 private:
 	// std::unordered_map<std::string, std::shared_ptr<Mesh>>		m_MeshMap;
 	// std::unordered_map<std::string, std::shared_ptr<Material>>	m_MaterialMap;
 
-	std::unordered_map<std::string, std::shared_ptr<GameObject>> m_pGameObject;
+	std::unordered_map<std::string, std::shared_ptr<GameObject>> m_pGameObjects;
 
 };
 

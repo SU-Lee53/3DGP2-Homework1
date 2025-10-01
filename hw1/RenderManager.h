@@ -4,7 +4,13 @@ class Mesh;
 class Material;
 class StructuredBuffer;
 
-#define MAX_INSTANCING_COUNT 300000
+#define MAX_INSTANCING_COUNT						10000
+#define ASSUMED_MESH_PER_INSTANCE					30
+#define ASSUMED_MATERIAL_PER_MESH					2
+#define ASSUMED_REQUIRED_STRUCTURED_BUFFER_SIZE		MAX_INSTANCING_COUNT * ASSUMED_MESH_PER_INSTANCE * ASSUMED_MATERIAL_PER_MESH
+
+#define ASSUMED_OBJECT_TYPE_PER_SCENE				2
+#define ASSUMED_REQUIRED_DESCRIPTOR_COUNT			Scene::g_uiDescriptorCountPerScene + 1 + ASSUMED_MESH_PER_INSTANCE * ASSUMED_MATERIAL_PER_MESH * ASSUMED_OBJECT_TYPE_PER_SCENE
 
 struct INSTANCE_DATA {
 	XMFLOAT4X4 xmf4x4GameObject;
@@ -25,11 +31,9 @@ struct std::hash<INSTANCE_KEY> {
 	size_t operator()(const INSTANCE_KEY& key) const {
 		size_t h1 = std::hash<std::shared_ptr<Mesh>>{}(key.pMesh);
 		size_t h2 = std::hash<std::shared_ptr<Material>>{}(key.pMaterials[0]);
-		return h1 ^ h2;	// XOR 연산을 이용한 해시 결합
+		return h1 ^ h2;
 	}
 };
-
-//#define INSTANCES_IN_HASHMAP
 
 class RenderManager {
 public:
@@ -44,11 +48,9 @@ public:
 	void SetDescriptorHeapToPipeline(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList) const;
 
 private:
-	std::unordered_map<INSTANCE_KEY, std::vector<INSTANCE_DATA>> m_InstanceMap;
-
-	std::unordered_map<INSTANCE_KEY, size_t> m_InstanceIndexMap;
+	std::unordered_map<INSTANCE_KEY, UINT> m_InstanceIndexMap;
 	std::vector<std::pair<INSTANCE_KEY, std::vector<INSTANCE_DATA>>> m_InstanceDatas;
-	size_t m_nInstanceIndex = 0;
+	UINT m_nInstanceIndex = 0;
 	
 
 	ComPtr<ID3D12Device>			m_pd3dDevice = nullptr;	// GameFramewok::m_pd3dDevice 의 참조

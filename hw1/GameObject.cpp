@@ -179,7 +179,6 @@ void GameObject::AddToRenderMap()
 	for (auto& pChild : m_pChildren) {
 		pChild->AddToRenderMap();
 	}
-
 }
 
 void GameObject::ReleaseUploadBuffers()
@@ -442,6 +441,7 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 std::shared_ptr<GameObject> GameObject::LoadGeometryFromFile(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, ComPtr<ID3D12RootSignature> pd3dRootSignature, const std::string& strFilePath)
 {
 	std::string strFileName = std::filesystem::path{ strFilePath }.stem().string();
+
 	if (auto pObj = RESOURCE->GetGameObject(strFileName)) {
 		return pObj;
 	}
@@ -465,8 +465,11 @@ std::shared_ptr<GameObject> GameObject::LoadGeometryFromFile(ComPtr<ID3D12Device
 		}
 	}
 
-	RESOURCE->AddGameObject(strFileName, pGameObject);
-	return pGameObject;
+	if (pGameObject) {
+		return RESOURCE->AddGameObject(strFileName, pGameObject);
+	}
+
+	return nullptr;
 }
 
 std::shared_ptr<GameObject> GameObject::CopyObject(const GameObject& srcObject, std::shared_ptr<GameObject> pParent)

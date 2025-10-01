@@ -26,8 +26,6 @@ public:
 	virtual void CreateShaderVariables(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 	virtual void UpdateShaderVariable(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
 
-	void UpdateImGui();
-
 private:
 	void CreateRootSignature(ComPtr<ID3D12Device> pd3dDevice);
 
@@ -54,11 +52,11 @@ private:
 
 public:
 	const static UINT g_uiDescriptorCountPerScene = 2;	// Camera + Lights
-	int m_nInstance = 0;
 
 private:
 	// Preloaded Instances
 	std::vector<std::vector<std::shared_ptr<GameObject>>> m_pPreLoadedObjects;
+	int m_nMaxObjects = 0;
 	int m_nObjectSelected = 0;
 	int m_nObjectCount = 500;
 };

@@ -23,8 +23,8 @@ VS_LIGHTING_OUTPUT VSMain(VS_LIGHTING_INPUT input, uint nInstanceID : SV_Instanc
 {
 	VS_LIGHTING_OUTPUT output;
 
-    output.normalW = mul(input.normal, (float3x3)sbInstanceData[gnBaseIndex + nInstanceID].mtxGameObject);
-    output.positionW = (float3) mul(float4(input.position, 1.0f), sbInstanceData[gnBaseIndex + nInstanceID].mtxGameObject);
+    output.normalW = mul(input.normal, (float3x3)sbInstanceData[gnBaseIndex + nInstanceID]);
+    output.positionW = (float3) mul(float4(input.position, 1.0f), sbInstanceData[gnBaseIndex + nInstanceID]);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 #ifdef _WITH_VERTEX_LIGHTING
 	output.normalW = normalize(output.normalW);

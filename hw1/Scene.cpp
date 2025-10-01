@@ -117,7 +117,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	int zObjects = 10;
 	int i = 0;
 
-	m_nInstance = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
+	m_nMaxObjects = (xObjects * 2 + 1) * (yObjects * 2 + 1) * (zObjects * 2 + 1);
 
 	float fxPitch = 200.f;
 	float fyPitch = 100.f;
@@ -127,7 +127,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	m_pPreLoadedObjects.resize(6);
 
 	// Apache
-	m_pPreLoadedObjects[0].reserve(m_nInstance);
+	m_pPreLoadedObjects[0].reserve(m_nMaxObjects);
 	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			for (int x = -xObjects; x <= xObjects; ++x) {
@@ -145,7 +145,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	}
 
 	// Gunship
-	m_pPreLoadedObjects[1].reserve(m_nInstance);
+	m_pPreLoadedObjects[1].reserve(m_nMaxObjects);
 	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			for (int x = -xObjects; x <= xObjects; ++x) {
@@ -163,7 +163,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	}
 
 	// SuperCobra
-	m_pPreLoadedObjects[2].reserve(m_nInstance);
+	m_pPreLoadedObjects[2].reserve(m_nMaxObjects);
 	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			for (int x = -xObjects; x <= xObjects; ++x) {
@@ -181,7 +181,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	}
 
 	// Hummer
-	m_pPreLoadedObjects[3].reserve(m_nInstance);
+	m_pPreLoadedObjects[3].reserve(m_nMaxObjects);
 	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			for (int x = -xObjects; x <= xObjects; ++x) {
@@ -199,7 +199,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	}
 
 	// M26
-	m_pPreLoadedObjects[4].reserve(m_nInstance);
+	m_pPreLoadedObjects[4].reserve(m_nMaxObjects);
 	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			for (int x = -xObjects; x <= xObjects; ++x) {
@@ -217,7 +217,7 @@ void Scene::BuildObjects(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsC
 	}
 
 	// Mi24
-	m_pPreLoadedObjects[5].reserve(m_nInstance);
+	m_pPreLoadedObjects[5].reserve(m_nMaxObjects);
 	for (int z = 0; z <= (2 * zObjects); ++z) {
 		for (int y = -yObjects; y <= yObjects; ++y) {
 			for (int x = -xObjects; x <= xObjects; ++x) {
@@ -269,8 +269,7 @@ bool Scene::ProcessInput(UCHAR* pKeysBuffer)
 	if (pKeysBuffer[VK_PRIOR]	& 0xF0)		m_nObjectCount += 1000;
 	if (pKeysBuffer[VK_NEXT]	& 0xF0)		m_nObjectCount -= 1000;
 	
-
-	m_nObjectCount = std::clamp(m_nObjectCount, 0, m_nInstance);
+	m_nObjectCount = std::clamp(m_nObjectCount, 0, m_nMaxObjects);
 
 	return false;
 }
@@ -291,10 +290,6 @@ void Scene::Update(float fTimeElapsed)
 		pSpotLight->m_xmf3Position = m_pPlayer->GetPosition();
 		pSpotLight->m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
-}
-
-void Scene::UpdateImGui()
-{
 }
 
 void Scene::Render(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
@@ -365,6 +360,7 @@ bool Scene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPara
 		case 'D': m_pPlayer->MoveStrafe(+1.0f); break;
 		case 'Q': m_pPlayer->MoveUp(+1.0f); break;
 		case 'R': m_pPlayer->MoveUp(-1.0f); break;
+
 		default:
 			break;
 		}
@@ -437,7 +433,7 @@ void Scene::CreateRootSignature(ComPtr<ID3D12Device> pd3dDevice)
 		
 		// Instance count
 		d3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-		d3dRootParameters[3].Constants.Num32BitValues = 2;
+		d3dRootParameters[3].Constants.Num32BitValues = 1;
 		d3dRootParameters[3].Constants.ShaderRegister = 3;
 		d3dRootParameters[3].Constants.RegisterSpace = 0;
 		d3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
