@@ -3,7 +3,7 @@
 #include "Scene.h"
 #include "ResourceManager.h"
 #include "RenderManager.h"
-//
+
 class Scene;
 
 class GameFramework {

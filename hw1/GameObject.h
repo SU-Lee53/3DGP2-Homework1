@@ -60,8 +60,6 @@ public:
 	std::shared_ptr<Mesh> GetMesh() const { return m_pMesh; }
 	std::vector<std::shared_ptr<Material>>& GetMaterials() { return m_pMaterials; }
 
-	const BoundingOrientedBox& GetOBBWorld() const { return m_xmOBBWorld; }
-	
 public:
 	virtual void OnPrepareRender() {}
 	virtual void AddToRenderMap();
@@ -81,10 +79,6 @@ public:
 
 	std::shared_ptr<GameObject> m_pParent;
 	std::vector<std::shared_ptr<GameObject>> m_pChildren;
-
-	BoundingOrientedBox m_xmOBB;
-	BoundingOrientedBox m_xmOBBWorld;
-
 
 public:
 	static std::vector<MATERIALLOADINFO> LoadMaterialsInfoFromFile(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, std::ifstream& inFile);

@@ -35,6 +35,8 @@ void RenderManager::Add(std::shared_ptr<GameObject> pGameObject)
 	if (it == m_InstanceIndexMap.end()) {
 		m_InstanceIndexMap[key] = m_nInstanceIndex++;
 		m_InstanceDatas.push_back({ key, {} });
+		m_nDrawCalls += key.pMaterials.size();
+
 
 		m_InstanceDatas[m_InstanceIndexMap[key]].second.emplace_back(xmf4x4InstanceData);
 	}
@@ -46,22 +48,6 @@ void RenderManager::Add(std::shared_ptr<GameObject> pGameObject)
 
 void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 {
-	// Shader 에 넘길 SHADER_VISIBLE 한 m_pd3dDescriptorHeap은 아래처럼 구성
-	// SRV 는 인스턴싱용 StructuredBuffer
-	// CBV 는 SubSet 별 Material 정보 (Mesh 마다 갯수 가 다름) -> SubSet 순서대로 기록되도록
-	//  
-	//  
-	//                    +---------> m_pd3dDescriptorHeap->GetCPUDescriptorHandleForHeapStart()
-	//                    |  
-	//                    +-----+-----+------+-----++-----+-----++-----++-----+-----++-----++-----++-----++-----+----- 
-	//  Descriptor 구성   | CBV | CBV | SRV  | CBV || CBV | ... || CBV || CBV | ... || CBV || CBV || CBV || CBV | ...
-	//                    +-----+-----+------+-----++-----+-----++-----++-----+-----++-----++-----++-----++-----+-----
-	//    Resource 단위   |   Scene   | Inst |      Mesh 1       |      Mesh 2       |          Mesh 3          | ...
-	//                    +-----------+------+-------------------+-------------------+--------------------------+-----
-	//                          |
-	//                          +-----------> 여기는 Scene::Render() 에서 복사함
-	//
-
 	UINT uiSBufferOffset = 0;
 	UINT uiDescriptorOffset = Scene::g_uiDescriptorCountPerScene;	// Per Scene 정보 2개 넣고 시작
 
@@ -78,9 +64,9 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 
 	// Instance 행렬 정보를 한번에 GPU에 바인딩
 #ifdef INSTANCING_USING_DESCRIPTOR_TABLE
-	m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, m_InstanceDataSBuffer.GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, 
+		m_InstanceDataSBuffer.GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	d3dCPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
-	uiDescriptorOffset++;
 
 	pd3dCommandList->SetGraphicsRootDescriptorTable(2, d3dGPUHandle);
 	d3dGPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
@@ -98,12 +84,10 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 
 		for (int i = 0; i < instanceKey.pMaterials.size(); ++i) {
 			instanceKey.pMaterials[i]->UpdateShaderVariable(pd3dCommandList);
-			m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, instanceKey.pMaterials[i]->GetCBuffer().GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			m_pd3dDevice->CopyDescriptorsSimple(1, d3dCPUHandle, 
+				instanceKey.pMaterials[i]->GetCBuffer().GetCPUDescriptorHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			d3dCPUHandle.ptr += GameFramework::g_uiDescriptorHandleIncrementSize;
-			uiDescriptorOffset++;
-		}
 
-		for (int i = 0; i < instanceKey.pMaterials.size(); ++i) {
 			instanceKey.pMaterials[i]->OnPrepareRender(pd3dCommandList);
 
 			pd3dCommandList->SetGraphicsRootDescriptorTable(1, d3dGPUHandle);
@@ -124,19 +108,14 @@ void RenderManager::SetDescriptorHeapToPipeline(ComPtr<ID3D12GraphicsCommandList
 
 void RenderManager::Clear()
 {
-#ifdef INSTANCES_IN_HASHMAP
-	m_InstanceMap.clear();
-
-#else
 	m_InstanceIndexMap.clear();
 	m_InstanceDatas.clear();
 	m_nInstanceIndex = 0;
+	m_nDrawCalls = 0;
 
-#endif
-	
 }
 
-size_t RenderManager::GetMeshCount()
+size_t RenderManager::GetMeshCount() const
 {
 #ifdef INSTANCES_IN_HASHMAP
 	return m_InstanceMap.size();

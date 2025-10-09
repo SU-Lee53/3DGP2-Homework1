@@ -93,7 +93,7 @@ void GameFramework::Render()
 	TSTRING tstrFrameRate;
 	m_GameTimer.GetFrameRate(L"3DGP-Homework1", tstrFrameRate);
 
-	tstrFrameRate = std::format(L"{} Mesh Count : {} Instance Count : {}", tstrFrameRate, RENDER->GetMeshCount(), m_pScene->GetObjectCount());
+	tstrFrameRate = std::format(L"{} Mesh Count : {} Instance Count : {} DrawCalls : {}", tstrFrameRate, RENDER->GetMeshCount(), m_pScene->GetObjectCount(), RENDER->GetDrawCallCount());
 
 	::SetWindowText(m_hWnd, tstrFrameRate.data());
 }
@@ -123,69 +123,47 @@ void GameFramework::CreateFactory()
 
 void GameFramework::CreateDevice()
 {
-	HRESULT hr;
+	HRESULT hResult;
 
-	// Create DXGIAdapter
-	ComPtr<IDXGIAdapter> pdxgiAdapter = nullptr;
-	DXGI_ADAPTER_DESC1 adapterDesc{};
-	size_t bestMemory = 0;
-	for (UINT adapterIndex = 0; ; ++adapterIndex)
+	UINT nDXGIFactoryFlags = 0;
+#if defined(_DEBUG)
+	ID3D12Debug* pd3dDebugController = NULL;
+	hResult = D3D12GetDebugInterface(__uuidof(ID3D12Debug), (void**)&pd3dDebugController);
+	if (pd3dDebugController)
 	{
-		ComPtr<IDXGIAdapter1> pCurAdapter = nullptr;
-		if (m_pdxgiFactory->EnumAdapters1(adapterIndex, pCurAdapter.GetAddressOf()) == DXGI_ERROR_NOT_FOUND) break;
-
-		DXGI_ADAPTER_DESC1 curAdapterDesc{};
-		if (FAILED(pCurAdapter->GetDesc1(&curAdapterDesc))) __debugbreak();
-
-		size_t curMemory = curAdapterDesc.DedicatedVideoMemory / (1024 * 1024);
-
-		if (curMemory > bestMemory)
-		{
-			bestMemory = curMemory;
-			pdxgiAdapter = pCurAdapter;
-			adapterDesc = curAdapterDesc;
-		}
+		pd3dDebugController->EnableDebugLayer();
+		pd3dDebugController->Release();
 	}
+	nDXGIFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+#endif
 
-	std::array<D3D_FEATURE_LEVEL, 3> featureLevels =
+	hResult = ::CreateDXGIFactory2(nDXGIFactoryFlags, __uuidof(IDXGIFactory4), (void**)&m_pdxgiFactory);
+
+	ComPtr<IDXGIAdapter1> pd3dAdapter = NULL;
+
+	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_pdxgiFactory->EnumAdapters1(i, pd3dAdapter.GetAddressOf()); i++)
 	{
-		D3D_FEATURE_LEVEL_12_2,
-		D3D_FEATURE_LEVEL_12_1,
-		D3D_FEATURE_LEVEL_12_0
-	};
-
-	// Device
-	for (int i = 0; i < featureLevels.size(); i++) {
-		hr = D3D12CreateDevice(pdxgiAdapter.Get(), featureLevels[i], IID_PPV_ARGS(m_pd3dDevice.GetAddressOf()));
-		if (SUCCEEDED(hr))
-			break;
+		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
+		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
+		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
+		if (SUCCEEDED(D3D12CreateDevice(pd3dAdapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(m_pd3dDevice.GetAddressOf())))) break;
 	}
 
-	if (!m_pd3dDevice) {
-		m_pdxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(pdxgiAdapter.GetAddressOf()));
-		hr = D3D12CreateDevice(pdxgiAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(m_pd3dDevice.GetAddressOf()));
-		if (FAILED(hr)) {
-			__debugbreak();
-		}
+	if (!pd3dAdapter)
+	{
+		m_pdxgiFactory->EnumWarpAdapter(_uuidof(IDXGIFactory4), (void**)&pd3dAdapter);
+		hResult = D3D12CreateDevice(pd3dAdapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(m_pd3dDevice.GetAddressOf()));
 	}
 
-	// MSAA
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS d3dMsaaQualityLevels;
-	{
-		d3dMsaaQualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		d3dMsaaQualityLevels.SampleCount = 4;
-		d3dMsaaQualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
-		d3dMsaaQualityLevels.NumQualityLevels = 0;
-	}
+	d3dMsaaQualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	d3dMsaaQualityLevels.SampleCount = 4;
+	d3dMsaaQualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
+	d3dMsaaQualityLevels.NumQualityLevels = 0;
+	hResult = m_pd3dDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &d3dMsaaQualityLevels, sizeof(D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS));
+	GameFramework::g_nMsaa4xQualityLevels = d3dMsaaQualityLevels.NumQualityLevels;
+	GameFramework::g_bMsaa4xEnable = (GameFramework::g_nMsaa4xQualityLevels > 1) ? true : false;
 
-	hr = m_pd3dDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &d3dMsaaQualityLevels, sizeof(D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS));
-	if (SUCCEEDED(hr)) {
-		g_nMsaa4xQualityLevels = d3dMsaaQualityLevels.NumQualityLevels;
-		g_bMsaa4xEnable = (g_nMsaa4xQualityLevels > 1) ? true : false;
-	}
-	else {
-		::OutputDebugString(L"Device doesn't support MSAA4x");
-	}
 }
 
 void GameFramework::CreateFence()
@@ -207,7 +185,7 @@ void GameFramework::CreateSwapChain()
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
 	::ZeroMemory(&dxgiSwapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
 	{
-		dxgiSwapChainDesc.BufferCount = g_nSwapChainBuffers;
+		dxgiSwapChainDesc.BufferCount = m_nSwapChainBuffers;
 		dxgiSwapChainDesc.BufferDesc.Width = GameFramework::g_nClientWidth;
 		dxgiSwapChainDesc.BufferDesc.Height = GameFramework::g_nClientHeight;
 		dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -219,8 +197,6 @@ void GameFramework::CreateSwapChain()
 		dxgiSwapChainDesc.SampleDesc.Count = (g_bMsaa4xEnable) ? 4 : 1;
 		dxgiSwapChainDesc.SampleDesc.Quality = (g_bMsaa4xEnable) ? (g_nMsaa4xQualityLevels - 1) : 0;
 		dxgiSwapChainDesc.Windowed = TRUE;
-
-		// Set backbuffer resolution as fullscreen resolution.
 		dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	}
 
@@ -463,8 +439,9 @@ void GameFramework::ProcessInput()
 		bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	}
 
-	if (!bProcessedByScene)
-	{
+	if (!bProcessedByScene) {
+		auto pPlayer = m_pScene->GetPlayer();
+
 		DWORD dwDirection = 0;
 		if (pKeysBuffer['W'] & 0xF0)	dwDirection |= MOVE_DIR_FORWARD;
 		if (pKeysBuffer['S'] & 0xF0)	dwDirection |= MOVE_DIR_BACKWARD;
@@ -473,24 +450,23 @@ void GameFramework::ProcessInput()
 		if (pKeysBuffer['E'] & 0xF0)	dwDirection |= MOVE_DIR_UP;
 		if (pKeysBuffer['Q'] & 0xF0)	dwDirection |= MOVE_DIR_DOWN;
 
-		if ((dwDirection != 0) || (pKeysBuffer[VK_RBUTTON] & 0xF0)) {
-			auto pPlayer = m_pScene->GetPlayer();
+		float cxDelta = 0.0f, cyDelta = 0.0f;
+		POINT ptCursorPos;
+		if (GetCapture() == m_hWnd) {
+			SetCursor(NULL);
+			GetCursorPos(&ptCursorPos);
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		}
 
-			float cxDelta = 0.0f, cyDelta = 0.0f;
-			POINT ptCursorPos;
-
-			if (pKeysBuffer[VK_RBUTTON] & 0xF0) {
-				SetCursor(NULL);
-				GetCursorPos(&ptCursorPos);
-				cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-				cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-				SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-
-				if (cxDelta || cyDelta) {
+		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f)) {
+			if (cxDelta || cyDelta) {
+				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+					pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+				else
 					pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-				}
 			}
-
 			if (dwDirection) pPlayer->Move(dwDirection, 1.5f, true);
 		}
 	}
@@ -502,10 +478,8 @@ void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 	}
 
-	switch (nMessageID)
-	{
+	switch (nMessageID) {
 	case WM_LBUTTONDOWN:
-		break;
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
@@ -527,11 +501,9 @@ void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 	}
 
-	switch (nMessageID)
-	{
+	switch (nMessageID) {
 	case WM_KEYUP:
-		switch (wParam)
-		{
+		switch (wParam) {
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
 			break;

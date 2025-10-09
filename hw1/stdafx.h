@@ -67,6 +67,8 @@ using namespace DirectX;
 
 #define INSTANCING_USING_DESCRIPTOR_TABLE
 
+#define FRAME_BUFFER_WIDTH	800
+#define FRAME_BUFFER_HEIGHT 600
 
 
 ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList, void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource** rppd3dUploadBuffer);

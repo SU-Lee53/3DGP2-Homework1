@@ -389,7 +389,6 @@ std::shared_ptr<GameObject> GameObject::LoadFrameHierarchyFromFile(ComPtr<ID3D12
 				}
 				if (pMesh) {
 					pGameObject->m_pMesh = pMesh;
-					BoundingOrientedBox::CreateFromPoints(pGameObject->m_xmOBB, pMeshLoadInfo->xmf3Positions.size(), pMeshLoadInfo->xmf3Positions.data(), sizeof(XMFLOAT3));
 				}
 			}
 		}
@@ -480,8 +479,6 @@ std::shared_ptr<GameObject> GameObject::CopyObject(const GameObject& srcObject, 
 	pClone->m_pMaterials = srcObject.m_pMaterials;
 	pClone->m_xmf4x4Transform = srcObject.m_xmf4x4Transform;
 	pClone->m_xmf4x4World = srcObject.m_xmf4x4World;
-	pClone->m_xmOBB = srcObject.m_xmOBB;
-	pClone->m_xmOBBWorld = srcObject.m_xmOBBWorld;
 
 	pClone->m_pParent = pParent;
 
