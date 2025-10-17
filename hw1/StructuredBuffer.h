@@ -7,6 +7,8 @@
 
 */
 
+//#define WITH_UPLOAD_BUFFER
+
 class StructuredBuffer {
 public:
 	StructuredBuffer() = default;
@@ -29,9 +31,18 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle() const;
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() const;
 
+#ifdef WITH_UPLOAD_BUFFER
+	void UpdateResources(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList);
+#endif
+
 private:
 	ComPtr<ID3D12DescriptorHeap>	m_pd3dSRVHeap = nullptr;
 	ComPtr<ID3D12Resource>			m_pd3dSBuffer = nullptr;
+#ifdef WITH_UPLOAD_BUFFER
+	ComPtr<ID3D12Resource>			m_pd3dUploadBuffer = nullptr;
+#endif
+
+
 	void*							m_pMappedPtr = nullptr;
 	UINT							m_nDatas = 0;
 
@@ -43,6 +54,7 @@ inline void StructuredBuffer::UpdateData(std::vector<T> data, UINT offset)
 	assert(data.size() < m_nDatas);
 	T* pMappedPtr = reinterpret_cast<T*>(m_pMappedPtr);
 	::memcpy(pMappedPtr + offset, data.data(), data.size() * sizeof(T));
+
 }
 
 template<typename T>

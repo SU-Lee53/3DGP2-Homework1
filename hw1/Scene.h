@@ -58,6 +58,6 @@ private:
 	std::vector<std::vector<std::shared_ptr<GameObject>>> m_pPreLoadedObjects;
 	int m_nMaxObjects = 0;
 	int m_nObjectSelected = 0;
-	int m_nObjectCount = 500;
+	int m_nObjectCount = 100;
 };
 

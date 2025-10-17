@@ -15,6 +15,30 @@ void StructuredBuffer::Create(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12Grap
 {
 	m_nDatas = nDatas;
 
+#ifdef WITH_UPLOAD_BUFFER
+	m_pd3dSBuffer = ::CreateBufferResource(
+		pd3dDevice,
+		pd3dCommandList,
+		NULL,
+		m_nDatas * elementSize,
+		D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		NULL
+	);
+
+	m_pd3dUploadBuffer = ::CreateBufferResource(
+		pd3dDevice,
+		pd3dCommandList,
+		NULL,
+		m_nDatas * elementSize,
+		D3D12_HEAP_TYPE_UPLOAD,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		NULL
+	);
+
+	m_pd3dUploadBuffer->Map(0, NULL, (void**)&m_pMappedPtr);
+
+#else
 	m_pd3dSBuffer = ::CreateBufferResource(
 		pd3dDevice,
 		pd3dCommandList,
@@ -26,6 +50,8 @@ void StructuredBuffer::Create(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12Grap
 	);
 
 	m_pd3dSBuffer->Map(0, NULL, (void**)&m_pMappedPtr);
+
+#endif
 
 	if (bCreateView) {
 		HRESULT hr;
@@ -72,3 +98,26 @@ D3D12_GPU_DESCRIPTOR_HANDLE StructuredBuffer::GetGPUDescriptorHandle() const
 {
 	return m_pd3dSRVHeap->GetGPUDescriptorHandleForHeapStart();
 }
+
+#ifdef WITH_UPLOAD_BUFFER
+void StructuredBuffer::UpdateResources(ComPtr<ID3D12Device> pd3dDevice, ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
+{
+	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
+	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
+	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	d3dResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	d3dResourceBarrier.Transition.pResource = m_pd3dSBuffer.Get();
+	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_GENERIC_READ;
+	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+
+	pd3dCommandList->CopyResource(m_pd3dSBuffer.Get(), m_pd3dUploadBuffer.Get());
+
+	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
+	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+
+}
+#endif

@@ -37,7 +37,6 @@ void RenderManager::Add(std::shared_ptr<GameObject> pGameObject)
 		m_InstanceDatas.push_back({ key, {} });
 		m_nDrawCalls += key.pMaterials.size();
 
-
 		m_InstanceDatas[m_InstanceIndexMap[key]].second.emplace_back(xmf4x4InstanceData);
 	}
 	else {
@@ -61,6 +60,10 @@ void RenderManager::Render(ComPtr<ID3D12GraphicsCommandList> pd3dCommandList)
 		m_InstanceDataSBuffer.UpdateData(instanceData, uiSBufferOffset);
 		uiSBufferOffset += instanceData.size();
 	}
+#ifdef WITH_UPLOAD_BUFFER
+	m_InstanceDataSBuffer.UpdateResources(m_pd3dDevice, pd3dCommandList);
+
+#endif
 
 	// Instance 행렬 정보를 한번에 GPU에 바인딩
 #ifdef INSTANCING_USING_DESCRIPTOR_TABLE
